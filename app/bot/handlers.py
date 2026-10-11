@@ -37,12 +37,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not expected:
         await update.message.reply_text(
             f"This chat id is {chat.id}.\n"
-            "Paste it into Markthunter settings next to your bot token, then send /start again."
+            "Paste it into Rabbat-IQ settings next to your bot token, then send /start again."
         )
         return
     if str(chat.id) != expected:
         return
-    await update.message.reply_text("Markthunter is listening.\n" + _help_text())
+    await update.message.reply_text("Rabbat-IQ is listening.\n" + _help_text())
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
