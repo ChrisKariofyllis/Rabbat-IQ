@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Interests · Markthunter{% endblock %}
+{% block heading %}Interests{% endblock %}
+{% block content %}
+<p class="lede">These are the products and categories the scan looks for. Wording can be German or English. Semantic mode, with your own model, also catches equivalents such as “Greek yogurt” and “Griechischer Joghurt”.</p>
+<form method="post" action="/interests" class="interest-add">
+  <label for="interest-text">Add an interest</label>
+  <div class="search-row">
+    <input id="interest-text" name="text" maxlength="80" required placeholder="Parkside tools">
+    <button type="submit">Add</button>
+  </div>
+</form>
+<div class="chips" aria-label="Examples">
+  <button type="button" class="chip" data-fill="Parkside tools">Parkside tools</button>
+  <button type="button" class="chip" data-fill="Greek yogurt">Greek yogurt</button>
+  <button type="button" class="chip" data-fill="beer">beer</button>
+  <button type="button" class="chip" data-fill="Werkzeugkasten">Werkzeugkasten</button>
+</div>
+{% if interests %}
+<ul class="interest-list">
+  {% for interest in interests %}
+  <li>
+    <span>{{ interest.text }}</span>
+    <form method="post" action="/interests/{{ interest.id }}/delete">
+      <button class="secondary" type="submit">Remove</button>
+    </form>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<div class="empty">
+  <h2>The list is empty</h2>
+  <p>Start with a few things you actually buy. Each interest becomes a Marktguru search during a scan.</p>
+</div>
+{% endif %}
+{% endblock %}
