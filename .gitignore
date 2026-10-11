@@ -7,3 +7,10 @@ __pycache__/
 data/
 *.db
 .DS_Store
+
+.agents/
+.cursor/skills/
+.cursor/rules/apple-design.mdc
+~/.agents/skills/apple-design
+~/.cursor/skills/apple-design
+~/.cursor/rules/apple-design.mdc
