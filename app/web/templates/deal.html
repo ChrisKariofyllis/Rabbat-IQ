@@ -1,0 +1,36 @@
+<article class="deal">
+  <div class="deal-top">
+    <p class="chain">{{ deal.chain or deal.store_name or "Store" }}</p>
+    {% if deal.when %}<p class="when">{{ deal.when }}</p>{% endif %}
+  </div>
+  {% if deal.image_url %}
+  <img src="{{ deal.image_url }}" alt="">
+  {% endif %}
+  <h3>{{ deal.product }}</h3>
+  {% if deal.brand %}<p class="brand">{{ deal.brand }}</p>{% endif %}
+  {% if deal.description %}<p class="desc">{{ deal.description }}</p>{% endif %}
+  <div class="price-row">
+    {% if deal.price %}<span class="price">{{ deal.price }}</span>{% endif %}
+    {% if deal.old_price %}<span class="was">{{ deal.old_price }}</span>{% endif %}
+    {% if deal.discount %}<span class="off">{{ deal.discount }}</span>{% endif %}
+  </div>
+  {% if deal.reference_price and deal.unit %}
+  <p class="hint">{{ deal.reference_price }} / {{ deal.unit }}</p>
+  {% endif %}
+  {% if deal.interest %}
+  <p class="why"><span>{{ deal.interest }}</span> · {{ deal.confidence }} · {{ deal.reason }}</p>
+  {% endif %}
+  {% if deal.store_name and deal.store_name != deal.chain %}
+  <p class="hint">{{ deal.store_name }}</p>
+  {% endif %}
+  <div class="deal-links">
+    {% if deal.link_url %}
+    <a href="{{ deal.link_url }}" target="_blank" rel="noopener noreferrer">Open offer</a>
+    {% endif %}
+    {% if deal.notified %}
+    <span class="hint">Sent to Telegram</span>
+    {% elif deal.notify_error %}
+    <span class="hint">Telegram: {{ deal.notify_error }}</span>
+    {% endif %}
+  </div>
+</article>

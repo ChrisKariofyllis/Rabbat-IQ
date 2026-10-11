@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Offers · Markthunter{% endblock %}
+{% block heading %}Offers{% endblock %}
+{% block content %}
+<form class="search" method="get" action="/offers">
+  <label for="q">Search Marktguru for this postal code</label>
+  <div class="search-row">
+    <input id="q" name="q" value="{{ query }}" maxlength="80" placeholder="Greek yogurt, beer, Parkside">
+    <button type="submit">Search</button>
+  </div>
+</form>
+{% if search_error %}
+<p class="banner bad" role="alert">{{ search_error }}</p>
+{% endif %}
+{% if query %}
+<section>
+  <h2>Live results for “{{ query }}”</h2>
+  {% if live %}
+  <div class="cards">
+    {% for deal in live %}
+    {% include "deal.html" %}
+    {% endfor %}
+  </div>
+  {% elif not search_error %}
+  <div class="empty"><p>No offers came back for that search.</p></div>
+  {% endif %}
+</section>
+{% endif %}
+<section>
+  <h2>Saved from the last scan</h2>
+  {% if saved %}
+  <div class="cards">
+    {% for deal in saved %}
+    {% include "deal.html" %}
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty"><p>A scan stores the offers it fetched for your interests. Live search above does not have to wait for that.</p></div>
+  {% endif %}
+</section>
+{% endblock %}
