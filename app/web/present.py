@@ -16,7 +16,7 @@ NAV = (
     {"id": "settings", "href": "/settings", "label": "Settings"},
 )
 
-PALETTE = ("#1e6a43", "#b42318", "#1d4e89", "#8a5a00", "#5c3d8f", "#0f6e6e", "#9a3d6a")
+PIN_COLORS = tuple(f"var(--color-pin-{index})" for index in range(1, 8))
 
 NOTICES = {
     "saved": "Settings saved.",
@@ -234,7 +234,7 @@ def _store_dict(store, point, color, show_label: bool) -> dict:
         "hours": store.opening_hours or "",
         "x": None if point is None else point[0],
         "y": None if point is None else point[1],
-        "color": color or "#1e6a43",
+        "color": color or "var(--color-pin-1)",
         "show_label": show_label,
     }
 
@@ -251,4 +251,4 @@ def _pages(raw: str) -> list[str]:
 
 def _color(name: str) -> str:
     total = sum(ord(char) for char in name or "")
-    return PALETTE[total % len(PALETTE)]
+    return PIN_COLORS[total % len(PIN_COLORS)]
