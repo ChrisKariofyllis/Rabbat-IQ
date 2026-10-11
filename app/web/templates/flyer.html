@@ -11,7 +11,7 @@
 <div class="page-grid">
   {% for page in flyer.pages %}
   <figure>
-    <img src="{{ page }}" alt="{{ flyer.chain }} flyer page {{ loop.index }}">
+    <img src="{{ page }}" alt="{{ flyer.chain }} flyer page {{ loop.index }}" loading="lazy" decoding="async">
     <figcaption>Page {{ loop.index }}</figcaption>
   </figure>
   {% endfor %}

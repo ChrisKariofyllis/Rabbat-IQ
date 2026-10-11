@@ -8,7 +8,7 @@
   {% for flyer in flyers %}
   <a class="flyer" href="/flyers/{{ flyer.id }}">
     {% if flyer.cover_url %}
-    <img src="{{ flyer.cover_url }}" alt="{{ flyer.chain }} flyer cover">
+    <img src="{{ flyer.cover_url }}" alt="{{ flyer.chain }} flyer cover" loading="lazy" decoding="async">
     {% else %}
     <div class="flyer-fallback">{{ flyer.chain }}</div>
     {% endif %}

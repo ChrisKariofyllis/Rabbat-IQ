@@ -42,8 +42,8 @@
   </header>
   <div class="frame workspace">
     <header class="top">
-      <p class="kicker">{{ place_label or "No postal code yet" }}</p>
       <h1>{% block heading %}Overview{% endblock %}</h1>
+      <p class="place">{{ place_label or "No postal code yet" }}</p>
     </header>
     <main id="content">
       {% if notice %}
