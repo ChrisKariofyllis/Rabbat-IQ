@@ -8,6 +8,15 @@
     <input id="q" name="q" value="{{ query }}" maxlength="80" placeholder="Greek yogurt, beer, Parkside">
     <button type="submit">Search</button>
   </div>
+  <label class="check interest-toggle">
+    <input type="checkbox" name="interests" value="1" {% if interest_only %}checked{% endif %}>
+    <span>Only offers that match my interests</span>
+  </label>
+  {% if interest_texts %}
+  <p class="hint">Current interests: {{ interest_texts | join(", ") }}</p>
+  {% else %}
+  <p class="hint">Add an interest to use this filter. Search still works on its own.</p>
+  {% endif %}
 </form>
 {% if search_error %}
 <p class="banner bad" role="alert">{{ search_error }}</p>
@@ -35,7 +44,13 @@
     {% endfor %}
   </div>
   {% else %}
-  <div class="empty"><p>A scan stores the offers it fetched for your interests. Live search above does not have to wait for that.</p></div>
+  <div class="empty">
+    {% if interest_only %}
+    <p>Nothing saved matches your current interests. Clear the filter to see every offer from the last scan.</p>
+    {% else %}
+    <p>A scan stores the offers it fetched for your interests. Live search above does not have to wait for that.</p>
+    {% endif %}
+  </div>
   {% endif %}
 </section>
 {% endblock %}
