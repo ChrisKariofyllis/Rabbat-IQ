@@ -167,6 +167,19 @@ def parse_store(raw: dict) -> StoreLocation:
     )
 
 
+def flyer_scope(raw: dict) -> str:
+    """Local means one booklet. Broader means a campaign shared across many."""
+
+    spread = bool(raw.get("spreadLeaflet"))
+    try:
+        leaflet_count = int(raw.get("leafletCount") or 0)
+    except (TypeError, ValueError):
+        leaflet_count = 0
+    if spread or leaflet_count > 1:
+        return "broader"
+    return "local"
+
+
 def parse_flight(raw: dict, *, cdn: str, site: str) -> Flyer:
     advertiser = raw.get("advertiser") or {}
     industry = raw.get("industry") or {}
@@ -193,6 +206,7 @@ def parse_flight(raw: dict, *, cdn: str, site: str) -> Flyer:
         page_urls=page_urls,
         source_url=f"{site}/leaflets/{leaflet_id}/page/0" if leaflet_id else site,
         source="marktguru",
+        scope=flyer_scope(raw),
     )
 
 
