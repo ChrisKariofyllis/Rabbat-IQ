@@ -15,7 +15,7 @@ import math
 import time
 from collections import Counter
 from pathlib import Path
-from urllib.parse import quote_plus
+from urllib.parse import urlparse
 
 import httpx
 
@@ -114,6 +114,43 @@ def _first(items):
     return {}
 
 
+def offer_link(raw: dict, *, site: str) -> str:
+    """Prefer a direct product URL, then the Marktguru offer page.
+
+    Generic search pages and category overviews are skipped. They 404 or land
+    on a catalogue that is not this product.
+    """
+
+    offer_id = str(raw.get("id") or "")
+    leaflet_id = raw.get("leafletFlightId")
+    external = str(raw.get("externalUrl") or "").strip()
+    if _specific_product_url(external):
+        return external
+    if offer_id:
+        return f"{site}/offers/{offer_id}"
+    if leaflet_id:
+        return f"{site}/leaflets/{leaflet_id}/page/0"
+    return ""
+
+
+def _specific_product_url(url: str) -> bool:
+    if not url.lower().startswith("http"):
+        return False
+    lowered = url.lower()
+    if any(token in lowered for token in ("doubleclick.", "flashtalking.", "trackclk", "googlesyndication.")):
+        return False
+    parsed = urlparse(url)
+    path = parsed.path.lower().rstrip("/")
+    query = parsed.query.lower()
+    if path.endswith("/suche") or path.endswith("/search"):
+        return False
+    generic_overview = "uebersicht" in path or path.endswith("/overview") or "kloffer-category" in query
+    specific_id = any(key in query for key in ("articleid", "productid", "offerid", "sku"))
+    if generic_overview and not specific_id:
+        return False
+    return True
+
+
 def parse_offer(raw: dict, *, cdn: str, site: str) -> Offer:
     product = raw.get("product") or {}
     brand = raw.get("brand") or {}
@@ -123,8 +160,7 @@ def parse_offer(raw: dict, *, cdn: str, site: str) -> Offer:
     offer_id = str(raw.get("id") or "")
     chain = str(advertiser.get("name") or "")
     product_name = str(product.get("name") or raw.get("description") or "Offer")
-    external = str(raw.get("externalUrl") or "")
-    link = external or f"{site}/suche?q={quote_plus(product_name)}"
+    link = offer_link(raw, site=site)
     leaflet_id = raw.get("leafletFlightId")
     return Offer(
         external_id=offer_id,
