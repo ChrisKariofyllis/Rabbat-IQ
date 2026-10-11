@@ -1,6 +1,6 @@
-# Markthunter
+# Rabbat-IQ
 
-Markthunter is a self-hosted tool that watches supermarket offers near a postal code and tells you when something matches what you actually buy. Interests, flyer images, and API keys stay on your machine. The model and the Telegram bot are optional, and both use credentials you provide.
+Rabbat-IQ is a self-hosted tool that watches supermarket offers near a postal code and tells you when something matches what you actually buy. Interests, flyer images, and API keys stay on your machine. The model and the Telegram bot are optional, and both use credentials you provide.
 
 It is aimed at Germany and Austria. The first data source is [Marktguru](https://www.marktguru.de/). Direct chain scrapers can be added beside it.
 
@@ -20,7 +20,7 @@ The same offer, interest, price, and end date are not sent again.
 docker compose up --build
 ```
 
-Open http://127.0.0.1:8787. The compose file binds that port to localhost. The SQLite database lives in the `markthunter-data` volume.
+Open http://127.0.0.1:8787. The compose file binds that port to localhost. The SQLite database lives in the `rabbat-iq-data` volume.
 
 Then:
 
@@ -92,15 +92,15 @@ The model is asked to return:
 
 ## Configuration
 
-Environment variables use the `MARKTHUNTER_` prefix. See `.env.example`.
+Environment variables use the `RABBAT_IQ_` prefix. See `.env.example`.
 
 | Variable | Purpose |
 | --- | --- |
-| `MARKTHUNTER_DATABASE_URL` | SQLite URL. Default `sqlite:///./data/markthunter.db` |
-| `MARKTHUNTER_DATA_DIR` | Key cache and other local files |
-| `MARKTHUNTER_BASIC_AUTH_USER` / `PASSWORD` | Optional password for the web UI |
-| `MARKTHUNTER_MARKTGURU_API_KEY` / `CLIENT_KEY` | Optional. Otherwise keys are read from the public homepage and cached for 12 hours |
-| `MARKTHUNTER_POSTAL_CODE` / `COUNTRY` | Used only when the database is first created |
+| `RABBAT_IQ_DATABASE_URL` | SQLite URL. Default `sqlite:///./data/rabbat-iq.db` |
+| `RABBAT_IQ_DATA_DIR` | Key cache and other local files |
+| `RABBAT_IQ_BASIC_AUTH_USER` / `PASSWORD` | Optional password for the web UI |
+| `RABBAT_IQ_MARKTGURU_API_KEY` / `CLIENT_KEY` | Optional. Otherwise keys are read from the public homepage and cached for 12 hours |
+| `RABBAT_IQ_POSTAL_CODE` / `COUNTRY` | Used only when the database is first created |
 
 If you publish the port beyond localhost, set the basic-auth variables.
 
@@ -128,7 +128,7 @@ pytest
 
 ## Legal
 
-Markthunter is an unofficial, personal, self-hosted client. You are responsible for complying with the terms of Marktguru and of any site you add a scraper for. Prefer the public aggregator API. This project does not ship scrapers for Lidl, Aldi, Rewe, or other chains.
+Rabbat-IQ is an unofficial, personal, self-hosted client. You are responsible for complying with the terms of Marktguru and of any site you add a scraper for. Prefer the public aggregator API. This project does not ship scrapers for Lidl, Aldi, Rewe, or other chains.
 
 Offer text, prices, and images remain the property of their sources. The relative store map is computed locally and does not load map tiles.
 
