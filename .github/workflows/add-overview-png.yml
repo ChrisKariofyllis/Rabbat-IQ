@@ -1,0 +1,35 @@
+name: add-overview-png
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/add-overview-png.yml"
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch PNG, verify blob, commit, and remove this workflow
+        env:
+          PNG_URL: "https://tmpfiles.org/dl/1791756395.49ebcd6342e716eb/wmAX6qDS7c3U/overview.png"
+        run: |
+          set -euo pipefail
+          mkdir -p docs
+          curl -fsSL -A "Mozilla/5.0" "$PNG_URL" -o docs/overview.png
+          python3 - << 'PY'
+          import hashlib, pathlib
+          data = pathlib.Path("docs/overview.png").read_bytes()
+          sha = hashlib.sha1(f"blob {len(data)}\0".encode() + data).hexdigest()
+          expected = "2ebe02d3a61f8e04733d9d0873fd326cca7c6d37"
+          if sha != expected:
+              raise SystemExit(f"blob mismatch {sha} size={len(data)}")
+          print(f"ok size={len(data)} sha={sha}")
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/overview.png
+          git rm -f .github/workflows/add-overview-png.yml
+          git commit -m "Add the overview screenshot to the README."
+          git push
