@@ -44,7 +44,7 @@ img { max-width: 100%; }
 
 .shell {
   display: grid;
-  grid-template-columns: var(--sidebar) 1fr;
+  grid-template-columns: var(--sidebar) minmax(0, 1fr);
   min-height: 100vh;
 }
 
@@ -164,6 +164,8 @@ button.secondary:hover { background: white; }
 .workspace {
   padding: 28px 32px 40px;
   max-width: 1180px;
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 
 .top { margin-bottom: 18px; }
@@ -298,7 +300,15 @@ h3 { margin: 8px 0 4px; font-size: 1.25rem; }
 
 .chain, .when, .brand, .desc { margin: 0; }
 
-.chain { font-size: 0.82rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.chain {
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  min-width: 0;
+}
+
+.when { white-space: nowrap; flex-shrink: 0; }
 
 .desc {
   color: var(--muted);
@@ -523,7 +533,7 @@ footer {
 }
 
 @media (max-width: 900px) {
-  .shell { grid-template-columns: 1fr; }
+  .shell { grid-template-columns: minmax(0, 1fr); }
   aside {
     position: static;
     height: auto;
@@ -539,7 +549,7 @@ footer {
   .scan-form button { width: auto; }
   .workspace { padding: 18px 16px 32px; }
   h1 { font-size: 2rem; }
-  .stats, .form-grid, .map-layout { grid-template-columns: 1fr; }
+  .stats, .form-grid, .map-layout, .cards { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (prefers-reduced-motion: reduce) {
