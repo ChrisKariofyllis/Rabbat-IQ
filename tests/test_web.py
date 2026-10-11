@@ -23,7 +23,7 @@ def test_pages_settings_and_interests(tmp_path):
     with make_client(tmp_path) as client:
         home = client.get("/")
         assert home.status_code == 200
-        assert "Markthunter" in home.text
+        assert "Rabbat-IQ" in home.text
         assert "Set up this machine" in home.text
 
         saved = client.post(
@@ -88,4 +88,4 @@ def test_basic_auth_protects_pages_but_not_health(tmp_path):
         assert client.get("/").status_code == 401
         authed = client.get("/", auth=("ada", "secret"))
         assert authed.status_code == 200
-        assert "Markthunter" in authed.text
+        assert "Rabbat-IQ" in authed.text
