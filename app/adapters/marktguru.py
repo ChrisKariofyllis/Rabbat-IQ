@@ -11,7 +11,6 @@ You are responsible for complying with Marktguru's terms of use.
 import asyncio
 import json
 import logging
-import math
 import time
 from collections import Counter
 from pathlib import Path
@@ -20,6 +19,7 @@ from urllib.parse import urlparse
 import httpx
 
 from app.domain import Flyer, GeoPlace, Offer, StoreLocation
+from app.geo import haversine_m
 from app.formatting import parse_dt
 from app.textutil import same_chain
 
@@ -286,11 +286,16 @@ def place_from_locations(results: list, postal_code: str, country: str) -> GeoPl
         return fallback
     if len(matches) == 1:
         return matches[0]
-    latitude = sum(item.latitude for item in matches) / len(matches)
-    longitude = sum(item.longitude for item in matches) / len(matches)
+    name = _shared_place_name(matches, postal_code)
+    exact = [item for item in matches if item.name.casefold() == name.casefold()]
+    # The town that shares the postal code's name is the center people shop
+    # from. Averaging every hamlet pulls that center into the fields.
+    chosen = exact or matches
+    latitude = sum(item.latitude for item in chosen) / len(chosen)
+    longitude = sum(item.longitude for item in chosen) / len(chosen)
     return GeoPlace(
         postal_code=postal_code,
-        name=_shared_place_name(matches, postal_code),
+        name=name,
         latitude=latitude,
         longitude=longitude,
         country=country,
@@ -312,13 +317,29 @@ def _shared_place_name(places: list[GeoPlace], postal_code: str) -> str:
     return nearest.name or postal_code
 
 
-def haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    radius = 6_371_000
-    phi1, phi2 = math.radians(lat1), math.radians(lat2)
-    d_phi = math.radians(lat2 - lat1)
-    d_lambda = math.radians(lon2 - lon1)
-    arc = math.sin(d_phi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(d_lambda / 2) ** 2
-    return 2 * radius * math.asin(min(1, math.sqrt(arc)))
+def merge_store_lists(primary: list[StoreLocation], extra: list[StoreLocation]) -> list[StoreLocation]:
+    """Keep Marktguru branches, and add OpenStreetMap ones that are not the same shop."""
+
+    merged = list(primary)
+    for store in extra:
+        if any(_same_branch(store, existing) for existing in merged):
+            continue
+        merged.append(store)
+    return merged
+
+
+def _same_branch(left: StoreLocation, right: StoreLocation) -> bool:
+    related = (
+        same_chain(left.chain, right.chain)
+        or same_chain(left.name, right.chain)
+        or same_chain(left.chain, right.name)
+        or same_chain(left.name, right.name)
+    )
+    if not related:
+        return False
+    if None in (left.latitude, left.longitude, right.latitude, right.longitude):
+        return same_chain(left.name, right.name)
+    return haversine_m(left.latitude, left.longitude, right.latitude, right.longitude) <= 400
 
 
 def apply_radius(store: StoreLocation, place: GeoPlace, radius_m: float) -> bool:
@@ -455,7 +476,21 @@ class MarktguruAdapter:
                 store = parse_store(item)
                 if apply_radius(store, place, radius_m):
                     found.append(store)
-        return found
+        try:
+            from app.geo import osm_supermarkets
+
+            extra = await osm_supermarkets(
+                place.latitude,
+                place.longitude,
+                radius_m,
+                client=self._client,
+                place_name=place.name,
+                country=place.country,
+            )
+        except Exception:
+            log.warning("OpenStreetMap store lookup failed", exc_info=True)
+            extra = []
+        return merge_store_lists(found, extra)
 
     async def search_offers(self, place: GeoPlace, query: str, limit: int = 24) -> list[Offer]:
         data = await self._get(
