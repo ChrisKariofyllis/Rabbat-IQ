@@ -200,16 +200,11 @@ def store_views(stores, home: tuple[float | None, float | None] | None = None) -
         return round(x, 2), round(y, 2)
 
     views = []
-    labels_left = 5
     for store in stores:
         point = None
-        show = False
         if store.latitude is not None and store.longitude is not None:
             point = xy(store.latitude, store.longitude)
-            show = labels_left > 0
-            if show:
-                labels_left -= 1
-        views.append(_store_dict(store, point, _color(store.chain or store.name), show))
+        views.append(_store_dict(store, point, _color(store.chain or store.name), False))
     home_point = None
     if home_lat is not None and home_lon is not None:
         hx, hy = xy(home_lat, home_lon)
