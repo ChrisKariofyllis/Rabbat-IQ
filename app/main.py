@@ -36,7 +36,7 @@ def create_app(env: EnvSettings | None = None) -> FastAPI:
         await bot_runner.stop()
         stop_scheduler()
 
-    app = FastAPI(title="Markthunter", version=__version__, lifespan=lifespan)
+    app = FastAPI(title="Rabbat-IQ", version=__version__, lifespan=lifespan)
     app.state.env = settings
     app.include_router(router)
     app.mount("/static", StaticFiles(directory=WEB_DIR / "static"), name="static")
@@ -85,7 +85,7 @@ async def basic_auth(request, call_next):
     return Response(
         "Authentication required",
         status_code=401,
-        headers={"WWW-Authenticate": 'Basic realm="Markthunter"'},
+        headers={"WWW-Authenticate": 'Basic realm="Rabbat-IQ"'},
     )
 
 
