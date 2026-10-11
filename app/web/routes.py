@@ -21,6 +21,7 @@ from app.web.present import (
     flyer_view,
     interest_offers,
     match_view,
+    matched_interest,
     notice_text,
     offer_view,
     scan_view,
@@ -180,17 +181,31 @@ def flyer_page(request: Request, flyer_id: int):
 
 
 @router.get("/offers")
-async def offers_page(request: Request, q: str = ""):
+async def offers_page(request: Request, q: str = "", interests: str = ""):
     query = " ".join(q.split())[:80]
-    saved = [offer_view(row) for row in repository.list_offers()]
-    live: list[dict] = []
+    interest_only = interests in {"1", "on", "true", "yes"}
+    interest_texts = [row.text for row in repository.list_interests()]
+    saved_rows = repository.list_offers()
+    live_rows: list = []
     error = ""
     if query:
-        live, error = await _live_search(query)
+        live_rows, error = await _live_search(query)
+    if interest_only:
+        saved_rows = [row for row in saved_rows if matched_interest(row, interest_texts)]
+        live_rows = [row for row in live_rows if matched_interest(row, interest_texts)]
     return templates.TemplateResponse(
         request,
         "offers.html",
-        page_context(request, "offers", saved=saved, live=live, query=query, search_error=error),
+        page_context(
+            request,
+            "offers",
+            saved=[_with_interest(row, interest_texts) for row in saved_rows],
+            live=[_with_interest(row, interest_texts) for row in live_rows],
+            query=query,
+            search_error=error,
+            interest_only=interest_only,
+            interest_texts=interest_texts,
+        ),
     )
 
 
@@ -367,7 +382,15 @@ def _sources():
     return catalog()
 
 
-async def _live_search(query: str) -> tuple[list[dict], str]:
+def _with_interest(offer, interests: list[str]) -> dict:
+    view = offer_view(offer)
+    label = matched_interest(offer, interests)
+    if label:
+        view["interest"] = label
+    return view
+
+
+async def _live_search(query: str) -> tuple[list, str]:
     from app.adapters.marktguru import AdapterError
     from app.adapters.registry import build_marktguru
 
@@ -383,7 +406,7 @@ async def _live_search(query: str) -> tuple[list[dict], str]:
             offers = await adapter.search_offers(place, query, limit=24)
     except AdapterError as exc:
         return [], str(exc)
-    return [offer_view(offer) for offer in offers], ""
+    return offers, ""
 
 
 def _iso(value) -> str | None:
