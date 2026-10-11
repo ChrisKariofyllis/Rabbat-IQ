@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{% block title %}Markthunter{% endblock %}</title>
+  <link rel="icon" href="{{ request.url_for('static', path='favicon.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ request.url_for('static', path='style.css') }}">
+</head>
+<body data-poll="{{ '1' if poll else '0' }}">
+  <a class="skip" href="#content">Skip to content</a>
+  <div class="shell">
+    <aside>
+      <a class="brand" href="/">
+        <img src="{{ request.url_for('static', path='favicon.svg') }}" width="32" height="32" alt="">
+        <span>
+          <span class="brand-name">Markthunter</span>
+          <span class="brand-note">Deals stay on this machine.</span>
+        </span>
+      </a>
+      <nav aria-label="Primary">
+        {% for item in nav %}
+        <a href="{{ item.href }}" class="{{ 'active' if active == item.id else '' }}" {% if active == item.id %}aria-current="page"{% endif %}>
+          <span>{{ item.label }}</span>
+          {% if item.id == 'matches' and match_count %}
+          <span class="count">{{ match_count }}</span>
+          {% endif %}
+        </a>
+        {% endfor %}
+      </nav>
+      <form method="post" action="/scan" class="scan-form">
+        <button type="submit" {% if not ready or scanning %}disabled{% endif %}>
+          {{ "Scanning…" if scanning else "Scan now" }}
+        </button>
+      </form>
+      <p class="aside-foot">
+        {% if scheduler_on %}
+        Automatic scans follow the interval in settings.
+        {% else %}
+        The scheduler is off in this process.
+        {% endif %}
+      </p>
+    </aside>
+    <div class="workspace">
+      <header class="top">
+        <div>
+          <p class="kicker">{{ place_label or "No postal code yet" }}</p>
+          <h1>{% block heading %}Overview{% endblock %}</h1>
+        </div>
+      </header>
+      <main id="content">
+        {% if notice %}
+        <p class="banner ok" role="status">{{ notice }}</p>
+        {% endif %}
+        {% if error %}
+        <p class="banner bad" role="alert">{{ error }}</p>
+        {% endif %}
+        {% block content %}{% endblock %}
+      </main>
+      <footer>
+        <p>Personal self-hosted tool. Offer data comes from Marktguru. You are responsible for complying with each source’s terms.</p>
+      </footer>
+    </div>
+  </div>
+  <script src="{{ request.url_for('static', path='app.js') }}"></script>
+</body>
+</html>
