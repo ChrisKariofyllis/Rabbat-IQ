@@ -220,7 +220,7 @@ async def test_telegram(request: Request):
     if not token or not chat_id:
         return _settings_response(request, errors=["Save a bot token and chat id before sending a test."])
     try:
-        await send_message(token, chat_id, "Markthunter is connected. Deal alerts will arrive in this chat.")
+        await send_message(token, chat_id, "Rabbat-IQ is connected. Deal alerts will arrive in this chat.")
     except TelegramError as exc:
         return _settings_response(request, errors=[f"Telegram did not accept the test. {exc}"])
     return _settings_response(request, notice="Test message sent.")
