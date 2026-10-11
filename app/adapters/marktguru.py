@@ -11,7 +11,9 @@ You are responsible for complying with Marktguru's terms of use.
 import asyncio
 import json
 import logging
+import math
 import time
+from collections import Counter
 from pathlib import Path
 from urllib.parse import quote_plus
 
@@ -210,6 +212,97 @@ def parse_place(raw: dict, postal_code: str, country: str) -> GeoPlace | None:
     )
 
 
+def place_from_locations(results: list, postal_code: str, country: str) -> GeoPlace | None:
+    """Center a postal code on every locality that shares it.
+
+    Marktguru returns hamlets first. Using only the first point puts the
+    radius on a village edge, so nearby branches look farther than they are.
+    """
+
+    matches: list[GeoPlace] = []
+    fallback: GeoPlace | None = None
+    for item in results:
+        if not isinstance(item, dict):
+            continue
+        place = parse_place(item, postal_code, country)
+        if place is None:
+            continue
+        zips = [str(code) for code in item.get("zipCodes") or []]
+        if postal_code and postal_code in zips:
+            matches.append(place)
+        elif fallback is None:
+            fallback = place
+    if not matches:
+        return fallback
+    if len(matches) == 1:
+        return matches[0]
+    latitude = sum(item.latitude for item in matches) / len(matches)
+    longitude = sum(item.longitude for item in matches) / len(matches)
+    return GeoPlace(
+        postal_code=postal_code,
+        name=_shared_place_name(matches, postal_code),
+        latitude=latitude,
+        longitude=longitude,
+        country=country,
+    )
+
+
+def _shared_place_name(places: list[GeoPlace], postal_code: str) -> str:
+    tokens = [place.name.split()[0] for place in places if place.name.split()]
+    if tokens:
+        winner, count = Counter(tokens).most_common(1)[0]
+        if count >= max(2, (len(places) + 1) // 2):
+            return winner
+    latitude = sum(place.latitude for place in places) / len(places)
+    longitude = sum(place.longitude for place in places) / len(places)
+    nearest = min(
+        places,
+        key=lambda place: (place.latitude - latitude) ** 2 + (place.longitude - longitude) ** 2,
+    )
+    return nearest.name or postal_code
+
+
+def haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    radius = 6_371_000
+    phi1, phi2 = math.radians(lat1), math.radians(lat2)
+    d_phi = math.radians(lat2 - lat1)
+    d_lambda = math.radians(lon2 - lon1)
+    arc = math.sin(d_phi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(d_lambda / 2) ** 2
+    return 2 * radius * math.asin(min(1, math.sqrt(arc)))
+
+
+def apply_radius(store: StoreLocation, place: GeoPlace, radius_m: float) -> bool:
+    """Measure the branch from the postal-code center and keep it inside the radius."""
+
+    if store.latitude is not None and store.longitude is not None:
+        store.distance_m = haversine_m(place.latitude, place.longitude, store.latitude, store.longitude)
+        return store.distance_m <= radius_m
+    if store.distance_m is None:
+        return False
+    return store.distance_m <= radius_m
+
+
+def leaflets_by_chain(flyers: list[Flyer], per_chain: int = 4, chain_limit: int = 16) -> list[Flyer]:
+    """Several leaflets per chain, largest first.
+
+    The booklet with the most offers is often a regional campaign whose nearest
+    branch sits outside a small radius. A smaller leaflet for the same chain
+    can list the local branch.
+    """
+
+    grouped: dict[str, list[Flyer]] = {}
+    for flyer in flyers:
+        if not flyer.external_id:
+            continue
+        grouped.setdefault(flyer.chain or flyer.external_id, []).append(flyer)
+    ranked = sorted(grouped.values(), key=lambda group: max(item.offer_count for item in group), reverse=True)
+    chosen: list[Flyer] = []
+    for group in ranked[:chain_limit]:
+        ordered = sorted(group, key=lambda item: item.offer_count, reverse=True)
+        chosen.extend(ordered[:per_chain])
+    return chosen
+
+
 def _number(value) -> float | None:
     if value is None or value == "":
         return None
@@ -261,19 +354,8 @@ class MarktguruAdapter:
         return False
 
     async def geocode(self, postal_code: str, country: str) -> GeoPlace | None:
-        data = await self._get("locations", {"q": postal_code, "limit": 5})
-        results = data.get("results") or []
-        for item in results:
-            zips = [str(code) for code in item.get("zipCodes") or []]
-            if postal_code in zips:
-                place = parse_place(item, postal_code, country or self.country)
-                if place is not None:
-                    return place
-        for item in results:
-            place = parse_place(item, postal_code, country or self.country)
-            if place is not None:
-                return place
-        return None
+        data = await self._get("locations", {"q": postal_code, "limit": 50})
+        return place_from_locations(data.get("results") or [], postal_code, country or self.country)
 
     async def leaflets(self, place: GeoPlace, industries: set[str] | None, preferred: list[str]) -> list[Flyer]:
         data = await self._get(
@@ -304,15 +386,8 @@ class MarktguruAdapter:
         return deduped[:30]
 
     async def nearby_stores(self, place: GeoPlace, flyers: list[Flyer], radius_m: float) -> list[StoreLocation]:
-        by_chain: dict[str, Flyer] = {}
-        for flyer in flyers:
-            current = by_chain.get(flyer.chain)
-            if current is None or flyer.offer_count > current.offer_count:
-                by_chain[flyer.chain] = flyer
         found: list[StoreLocation] = []
-        for flyer in list(by_chain.values())[:12]:
-            if not flyer.external_id:
-                continue
+        for flyer in leaflets_by_chain(flyers):
             try:
                 data = await self._get(
                     f"leaflets/{flyer.external_id}/stores",
@@ -328,7 +403,7 @@ class MarktguruAdapter:
                 continue
             for item in data.get("results") or []:
                 store = parse_store(item)
-                if store.distance_m is None or store.distance_m <= radius_m:
+                if apply_radius(store, place, radius_m):
                     found.append(store)
         return found
 
