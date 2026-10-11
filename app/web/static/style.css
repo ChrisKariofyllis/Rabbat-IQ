@@ -668,6 +668,34 @@ main { display: flex; flex-direction: column; gap: 28px; padding-top: 12px; }
   margin-top: 6px;
 }
 
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.filter-bar label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: var(--footnote);
+  font-weight: 600;
+  color: var(--secondary);
+}
+
+.filter-bar select {
+  min-height: var(--control);
+  min-width: 12rem;
+  border: 0;
+  border-radius: 10px;
+  background: var(--fill);
+  color: var(--ink);
+  padding: 0 12px;
+  font: inherit;
+  font-size: var(--body);
+}
+
 .search,
 .interest-add { margin: 0; }
 
