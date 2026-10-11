@@ -14,7 +14,7 @@ from app.domain import GeoPlace
 log = logging.getLogger(__name__)
 
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
-USER_AGENT = "Markthunter/0.1 (personal self-hosted deal scanner)"
+USER_AGENT = "Rabbat-IQ/0.1 (personal self-hosted deal scanner)"
 
 
 async def nominatim_geocode(postal_code: str, country: str) -> GeoPlace | None:
