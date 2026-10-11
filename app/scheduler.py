@@ -24,7 +24,7 @@ def start_scheduler() -> None:
     if _scheduler is not None:
         return
     _scheduler = AsyncIOScheduler(timezone="Europe/Berlin")
-    _scheduler.add_job(scheduled_tick, "interval", minutes=1, id="markthunter-tick", max_instances=1, coalesce=True)
+    _scheduler.add_job(scheduled_tick, "interval", minutes=1, id="rabbat-iq-tick", max_instances=1, coalesce=True)
     _scheduler.start()
     log.info("scheduler started")
 
