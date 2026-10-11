@@ -4,11 +4,13 @@ import pytest
 from app.adapters.marktguru import (
     MarktguruAdapter,
     keep_flyer,
+    leaflets_by_chain,
     parse_homepage_keys,
     parse_offer,
+    place_from_locations,
     selected_industries,
 )
-from app.domain import GeoPlace
+from app.domain import Flyer, GeoPlace
 from app.textutil import extract_json, parse_price, same_chain
 
 SAMPLE = {
@@ -82,3 +84,67 @@ async def test_search_sends_zip_and_key():
             )
     assert seen == {"zip": "10115", "query": "joghurt", "key": "secret"}
     assert offers[0].brand == "K-Classic"
+
+
+def test_place_from_locations_uses_the_postal_centroid():
+    place = place_from_locations(
+        [
+            {"name": "Sinzing Adlstein", "latitude": 48.9766, "longitude": 11.9426, "zipCodes": ["93161"]},
+            {"name": "Sinzing Alling", "latitude": 48.9959, "longitude": 12.0544, "zipCodes": ["93161"]},
+            {"name": "Other town", "latitude": 50.0, "longitude": 10.0, "zipCodes": ["10115"]},
+        ],
+        "93161",
+        "de",
+    )
+    assert place is not None
+    assert place.name == "Sinzing"
+    assert place.latitude == pytest.approx((48.9766 + 48.9959) / 2)
+    assert place.longitude == pytest.approx((11.9426 + 12.0544) / 2)
+    assert place.postal_code == "93161"
+
+
+def test_leaflets_by_chain_keeps_smaller_booklets():
+    big = Flyer("big", "Netto", "Netto", "Discounter", None, None, 8, 300, "", source_url="")
+    local = Flyer("local", "Netto", "Netto", "Discounter", None, None, 4, 20, "", source_url="")
+    chosen = leaflets_by_chain([big, local])
+    assert [item.external_id for item in chosen] == ["big", "local"]
+
+
+def _store(store_id: str, name: str, lat: float, lon: float):
+    return {
+        "id": store_id,
+        "name": name,
+        "storeChainName": "Netto",
+        "location": {
+            "latitude": lat,
+            "longitude": lon,
+            "address": name,
+            "zipCodes": ["93161"],
+            "name": "Sinzing",
+        },
+        "distanceInMeters": 9000,
+    }
+
+
+@pytest.mark.asyncio
+async def test_nearby_stores_keeps_the_local_branch():
+    def handler(request: httpx.Request) -> httpx.Response:
+        path = request.url.path
+        if path.endswith("/leaflets/big/stores"):
+            return httpx.Response(200, json={"results": [_store("far", "Netto Regensburg", 49.05, 12.10)]})
+        if path.endswith("/leaflets/local/stores"):
+            return httpx.Response(200, json={"results": [_store("near", "Netto Sinzing", 48.986, 11.999)]})
+        return httpx.Response(404, json={})
+
+    place = GeoPlace("93161", "Sinzing", 48.9863, 11.9985, "de")
+    flyers = [
+        Flyer("big", "Netto", "Netto", "Discounter", None, None, 8, 300, ""),
+        Flyer("local", "Netto", "Netto", "Discounter", None, None, 4, 20, ""),
+    ]
+    transport = httpx.MockTransport(handler)
+    async with httpx.AsyncClient(transport=transport) as client:
+        adapter = MarktguruAdapter(api_key="secret", client=client, delay=0)
+        async with adapter:
+            stores = await adapter.nearby_stores(place, flyers, 4000)
+    assert [store.name for store in stores] == ["Netto Sinzing"]
+    assert stores[0].distance_m < 4000
