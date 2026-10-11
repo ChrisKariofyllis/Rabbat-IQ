@@ -8,11 +8,13 @@ from app.adapters.marktguru import (
     parse_homepage_keys,
     parse_flight,
     offer_link,
+    merge_store_lists,
     parse_offer,
     place_from_locations,
     selected_industries,
 )
-from app.domain import Flyer, GeoPlace
+from app.domain import Flyer, GeoPlace, StoreLocation
+from app.geo import stores_from_nominatim, stores_from_overpass
 from app.textutil import extract_json, parse_price, same_chain
 
 SAMPLE = {
@@ -121,6 +123,22 @@ def test_flyer_scope_labels_a_single_booklet_as_local():
     assert broader.scope == "broader"
 
 
+def test_place_from_locations_prefers_the_named_town():
+    place = place_from_locations(
+        [
+            {"name": "Sinzing Adlstein", "latitude": 48.9766, "longitude": 11.9426, "zipCodes": ["93161"]},
+            {"name": "Sinzing", "latitude": 48.99028, "longitude": 12.03750, "zipCodes": ["93161"]},
+            {"name": "Sinzing Alling", "latitude": 48.98328, "longitude": 11.97819, "zipCodes": ["93161"]},
+        ],
+        "93161",
+        "de",
+    )
+    assert place is not None
+    assert place.name == "Sinzing"
+    assert place.latitude == pytest.approx(48.99028)
+    assert place.longitude == pytest.approx(12.03750)
+
+
 def test_place_from_locations_uses_the_postal_centroid():
     place = place_from_locations(
         [
@@ -136,6 +154,62 @@ def test_place_from_locations_uses_the_postal_centroid():
     assert place.latitude == pytest.approx((48.9766 + 48.9959) / 2)
     assert place.longitude == pytest.approx((11.9426 + 12.0544) / 2)
     assert place.postal_code == "93161"
+
+
+def test_merge_keeps_a_branch_the_leaflet_omits():
+    netto = StoreLocation("1", "Netto Marken-Discount Sinzing", "Netto Marken-Discount", "", "93161", "Sinzing", 48.9907, 12.0292, 600, "", "marktguru")
+    edeka = StoreLocation("osm-node-1", "EDEKA", "EDEKA", "Am Reitfeld 8a", "93161", "Sinzing", 48.9950, 12.0324, 650, "", "openstreetmap")
+    duplicate = StoreLocation("osm-node-2", "Netto Marken-Discount", "Netto Marken-Discount", "", "93161", "Sinzing", 48.9908, 12.0293, 610, "", "openstreetmap")
+    merged = merge_store_lists([netto], [duplicate, edeka])
+    assert [store.chain for store in merged] == ["Netto Marken-Discount", "EDEKA"]
+
+
+def test_overpass_keeps_supermarkets_inside_the_radius():
+    payload = {
+        "elements": [
+            {
+                "type": "node",
+                "id": 9,
+                "lat": 48.9950,
+                "lon": 12.0324,
+                "tags": {"name": "EDEKA", "brand": "EDEKA", "addr:postcode": "93161", "addr:street": "Am Reitfeld", "addr:housenumber": "8a"},
+            },
+            {
+                "type": "node",
+                "id": 10,
+                "lat": 49.05,
+                "lon": 12.10,
+                "tags": {"name": "Far", "brand": "Lidl"},
+            },
+        ]
+    }
+    stores = stores_from_overpass(payload, 48.99028, 12.03750, 2000)
+    assert [store.name for store in stores] == ["EDEKA"]
+    assert stores[0].postal_code == "93161"
+    assert stores[0].distance_m < 1000
+
+
+def test_nominatim_keeps_a_named_branch_inside_the_radius():
+    stores = stores_from_nominatim(
+        [
+            {
+                "lat": "48.9950344",
+                "lon": "12.0323854",
+                "display_name": "EDEKA, Am Reitfeld, Sinzing, 93161, Deutschland",
+                "osm_type": "node",
+                "osm_id": 42,
+                "address": {"shop": "EDEKA", "road": "Am Reitfeld", "house_number": "8a", "postcode": "93161", "town": "Sinzing"},
+            }
+        ],
+        "EDEKA",
+        48.99028,
+        12.03750,
+        2000,
+    )
+    assert len(stores) == 1
+    assert stores[0].chain == "EDEKA"
+    assert stores[0].distance_m < 1000
+    assert stores[0].postal_code == "93161"
 
 
 def test_leaflets_by_chain_keeps_smaller_booklets():
