@@ -316,7 +316,7 @@ def _resolve_interest(label: str, interests: list[str]) -> str | None:
 async def _download_image(url: str) -> bytes | None:
     try:
         async with httpx.AsyncClient(timeout=20, follow_redirects=True) as client:
-            response = await client.get(url, headers={"User-Agent": "Markthunter/0.1"})
+            response = await client.get(url, headers={"User-Agent": "Rabbat-IQ/0.1"})
     except httpx.HTTPError:
         log.warning("could not download flyer image")
         return None
