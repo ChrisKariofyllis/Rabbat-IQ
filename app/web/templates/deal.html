@@ -4,7 +4,9 @@
     {% if deal.when %}<p class="when">{{ deal.when }}</p>{% endif %}
   </div>
   {% if deal.image_url %}
-  <img src="{{ deal.image_url }}" alt="">
+  <div class="deal-photo">
+    <img src="{{ deal.image_url }}" alt="">
+  </div>
   {% endif %}
   <h3>{{ deal.product }}</h3>
   {% if deal.brand %}<p class="brand">{{ deal.brand }}</p>{% endif %}
