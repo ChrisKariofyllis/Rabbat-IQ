@@ -1,59 +1,54 @@
 /* Rabbat-IQ color system. Change these variables to retune the whole interface. */
 
 :root {
-  --color-purple-950: #3e1e3c;
-  --color-purple-900: #542a52;
-  --color-purple-700: #6e3a68;
-  --color-purple-500: #8c5c86;
-  --color-purple-300: #d4b8d0;
-  --color-purple-100: #f6eef5;
+  --color-ink: #1c1915;
+  --color-ink-soft: #3a342c;
+  --color-ink-muted: #5e584e;
 
-  --color-peach-700: #e07a68;
-  --color-peach-500: #fb9b8a;
-  --color-peach-300: #fdc9c0;
-  --color-peach-100: #fff1ee;
+  --color-gold: #f3c969;
+  --color-gold-700: #c4922a;
+  --color-gold-300: #f8e3a8;
+  --color-gold-100: #fbf3dc;
 
-  --color-neutral-900: #2a1828;
-  --color-neutral-600: #6b5568;
-  --color-neutral-300: #e6d8e4;
-  --color-neutral-100: #f7f2f6;
-  --color-neutral-0: #ffffff;
+  --color-green: #1e6a43;
+  --color-green-800: #154e31;
+  --color-green-500: #2e8b57;
+  --color-green-100: #e5f3eb;
 
-  --color-accent-700: #8a4a42;
-  --color-accent-500: #c46a52;
-  --color-ok-700: #1e6b45;
-  --color-ok-100: #e5f5ec;
-  --color-bad-700: #8e2430;
-  --color-bad-100: #fdecee;
+  --color-paper: #f3efe6;
+  --color-paper-deep: #e7e1d4;
+  --color-surface: #fffcf7;
+  --color-surface-warm: #fbf6ea;
 
-  --color-bg: var(--color-neutral-100);
-  --color-surface: var(--color-neutral-0);
-  --color-surface-warm: var(--color-peach-100);
-  --color-text: var(--color-neutral-900);
-  --color-text-secondary: var(--color-neutral-600);
-  --color-border: var(--color-neutral-300);
-  --color-primary: var(--color-purple-900);
-  --color-primary-press: var(--color-purple-950);
-  --color-on-primary: var(--color-neutral-0);
-  --color-link: var(--color-purple-900);
-  --color-chip-bg: var(--color-peach-300);
-  --color-chip-ink: var(--color-purple-900);
-  --color-ok-bg: var(--color-ok-100);
-  --color-ok-ink: var(--color-ok-700);
+  --color-bad-700: #8c2f2f;
+  --color-bad-100: #f8e8e4;
+
+  --color-bg: var(--color-paper);
+  --color-text: var(--color-ink);
+  --color-text-secondary: var(--color-ink-muted);
+  --color-border: var(--color-paper-deep);
+  --color-primary: var(--color-green);
+  --color-primary-press: var(--color-green-800);
+  --color-on-primary: #fffcf7;
+  --color-link: var(--color-green-800);
+  --color-chip-bg: var(--color-gold);
+  --color-chip-ink: var(--color-ink);
+  --color-ok-bg: var(--color-green-100);
+  --color-ok-ink: var(--color-green-800);
   --color-bad-bg: var(--color-bad-100);
   --color-bad-ink: var(--color-bad-700);
-  --color-focus: var(--color-peach-700);
-  --color-fill: var(--color-purple-100);
-  --color-emphasis: var(--color-purple-900);
-  --color-shadow: color-mix(in srgb, var(--color-purple-900) 14%, transparent);
+  --color-focus: var(--color-gold-700);
+  --color-fill: var(--color-gold-100);
+  --color-emphasis: var(--color-green);
+  --color-shadow: color-mix(in srgb, var(--color-ink) 12%, transparent);
 
-  --color-pin-1: var(--color-purple-900);
-  --color-pin-2: var(--color-accent-700);
-  --color-pin-3: var(--color-purple-700);
-  --color-pin-4: var(--color-ok-700);
-  --color-pin-5: var(--color-accent-500);
-  --color-pin-6: var(--color-purple-500);
-  --color-pin-7: var(--color-peach-700);
+  --color-pin-1: var(--color-green);
+  --color-pin-2: var(--color-gold-700);
+  --color-pin-3: var(--color-ink-soft);
+  --color-pin-4: var(--color-green-800);
+  --color-pin-5: var(--color-green-500);
+  --color-pin-6: var(--color-ink);
+  --color-pin-7: var(--color-bad-700);
 
   color-scheme: light dark;
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
@@ -71,52 +66,52 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-bg: #1a1018;
-    --color-surface: #2a1a28;
-    --color-surface-warm: #3a2430;
-    --color-text: #f8f1f6;
-    --color-text-secondary: #d7c3d2;
-    --color-border: #4a3548;
-    --color-primary: #c9a0c4;
-    --color-primary-press: #e4c8e0;
-    --color-on-primary: #2a1828;
-    --color-link: #f3c7be;
-    --color-chip-bg: #5a3040;
-    --color-chip-ink: #fdc9c0;
-    --color-ok-bg: #143224;
-    --color-ok-ink: #8ee0b0;
-    --color-bad-bg: #3a1820;
-    --color-bad-ink: #ffb4b0;
-    --color-focus: #fb9b8a;
-    --color-fill: #3a2438;
-    --color-emphasis: #f3c7be;
-    --color-shadow: color-mix(in srgb, var(--color-neutral-900) 40%, transparent);
-    --color-pin-1: #d4b8d0;
-    --color-pin-2: #fb9b8a;
-    --color-pin-3: #c9a0c4;
-    --color-pin-4: #8ee0b0;
-    --color-pin-5: #fdc9c0;
-    --color-pin-6: #e4c8e0;
-    --color-pin-7: #f3c7be;
+    --color-bg: #1c1915;
+    --color-surface: #2a261f;
+    --color-surface-warm: #332e24;
+    --color-text: #f3efe6;
+    --color-text-secondary: #d9d0c0;
+    --color-border: #4a4338;
+    --color-primary: #f3c969;
+    --color-primary-press: #e7c56a;
+    --color-on-primary: #1c1915;
+    --color-link: #f3c969;
+    --color-chip-bg: #5c4a22;
+    --color-chip-ink: #f8e3a8;
+    --color-ok-bg: #163528;
+    --color-ok-ink: #9ddeb8;
+    --color-bad-bg: #3a2220;
+    --color-bad-ink: #f0b4ae;
+    --color-focus: #f3c969;
+    --color-fill: #3a342c;
+    --color-emphasis: #f3c969;
+    --color-shadow: color-mix(in srgb, var(--color-ink) 55%, transparent);
+    --color-pin-1: #9ddeb8;
+    --color-pin-2: #f3c969;
+    --color-pin-3: #f3efe6;
+    --color-pin-4: #e7c56a;
+    --color-pin-5: #7dcea0;
+    --color-pin-6: #d9d0c0;
+    --color-pin-7: #f0b4ae;
   }
 }
 
 @media (prefers-contrast: more) {
   :root {
     --color-text-secondary: var(--color-text);
-    --color-border: var(--color-purple-900);
-    --color-link: var(--color-purple-950);
-    --color-focus: var(--color-purple-900);
+    --color-border: var(--color-ink);
+    --color-link: var(--color-green-800);
+    --color-focus: var(--color-ink);
   }
 }
 
 @media (prefers-color-scheme: dark) and (prefers-contrast: more) {
   :root {
     --color-text-secondary: var(--color-text);
-    --color-border: var(--color-peach-300);
-    --color-link: var(--color-peach-100);
-    --color-bg: #10080e;
-    --color-surface: #10080e;
+    --color-border: var(--color-gold);
+    --color-link: var(--color-gold-100);
+    --color-bg: #12100e;
+    --color-surface: #12100e;
   }
 }
 
@@ -134,7 +129,7 @@ body {
   line-height: 1.45;
   color: var(--color-text);
   background:
-    radial-gradient(900px 320px at 50% -80px, var(--color-peach-100), transparent 70%),
+    radial-gradient(900px 320px at 50% -80px, var(--color-gold-100), transparent 70%),
     var(--color-bg);
 }
 
@@ -232,8 +227,8 @@ a:hover { text-decoration-thickness: 2px; }
 .site-nav a:hover { background: var(--color-fill); }
 
 .site-nav a.active {
-  background: var(--color-peach-100);
-  color: var(--color-purple-950);
+  background: var(--color-gold);
+  color: var(--color-ink);
 }
 
 .count {
@@ -428,7 +423,7 @@ main {
 
 .scope-local { background: var(--color-ok-bg); color: var(--color-ok-ink); }
 
-.scope-broader { background: var(--color-peach-100); color: var(--color-purple-900); }
+.scope-broader { background: var(--color-gold-100); color: var(--color-ink); }
 
 .scope-postal { background: var(--color-fill); color: var(--color-text-secondary); }
 
