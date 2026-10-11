@@ -1,0 +1,17 @@
+services:
+  markthunter:
+    build: .
+    ports:
+      # Bound to localhost. Drop the 127.0.0.1 prefix only if you mean to
+      # expose the UI, and set MARKTHUNTER_BASIC_AUTH_USER/PASSWORD when you do.
+      - "127.0.0.1:8787:8000"
+    environment:
+      MARKTHUNTER_DATABASE_URL: sqlite:////data/markthunter.db
+      MARKTHUNTER_DATA_DIR: /data
+      MARKTHUNTER_LOG_LEVEL: INFO
+    volumes:
+      - markthunter-data:/data
+    restart: unless-stopped
+
+volumes:
+  markthunter-data:
