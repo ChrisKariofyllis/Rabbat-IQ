@@ -247,7 +247,7 @@ async def test_ai(request: Request):
 
 
 @router.post("/scan")
-def start_scan():
+async def start_scan():
     if not repository.get_settings().postal_code or not repository.list_interests():
         return RedirectResponse("/?notice=need-setup", status_code=303)
     outcome = try_start_scan("manual")

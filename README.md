@@ -57,7 +57,7 @@ Alerts include the product, price, store, validity, why it matched, and a pictur
 
 ## AI providers
 
-Keyword matching works with no key. It understands a short bilingual grocery list (`beer` / `Bier`, `yogurt` / `Joghurt`, `tools` / `Werkzeug`) and otherwise looks for your words.
+Keyword matching works with no key. It understands a short bilingual grocery list (`beer` / `Bier`, `yogurt` / `Joghurt`, `tools` / `Werkzeug`) and otherwise looks for your words. The same list is used to build the Marktguru query, so an English interest still searches the German index. “beer” is searched as Bier or Pils, because that index stems the English word into Beeren (berries).
 
 | Provider | Default model | Key |
 | --- | --- | --- |

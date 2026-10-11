@@ -1,10 +1,12 @@
+import asyncio
+
 import pytest
 
 from app.config import EnvSettings
 from app.domain import Flyer, GeoPlace, Offer, StoreLocation
 from app.main import create_app
 from app.services import repository
-from app.services.scan import reset_scan_state, run_scan
+from app.services.scan import is_scanning, reset_scan_state, run_scan, try_start_scan
 
 
 class FakeSource:
@@ -115,7 +117,24 @@ async def test_scan_is_idempotent_and_filters_chains(app):
     assert repository.list_stores()[0].name == "Kaufland Berlin-Moabit"
     assert repository.get_settings().place_name == "Berlin Mitte"
 
+    assert repository.latest_scan().status == "ok"
+
     repository.update_settings(preferred_stores="Lidl")
     third = await run_scan("test", sources=[source], notify=notify)
     assert third["offers_seen"] == 0
     assert repository.count_matches() == 1
+
+
+@pytest.mark.asyncio
+async def test_background_scan_starts_on_the_event_loop(app):
+    assert try_start_scan("manual") == "started"
+    assert is_scanning()
+    for _ in range(50):
+        if not is_scanning():
+            break
+        await asyncio.sleep(0.02)
+    assert not is_scanning()
+    last = repository.latest_scan()
+    assert last is not None
+    assert last.status == "error"
+    assert "postal code" in last.message

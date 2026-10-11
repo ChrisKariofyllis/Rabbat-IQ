@@ -6,6 +6,7 @@ from datetime import timedelta
 
 from app.adapters.marktguru import AdapterError
 from app.adapters.registry import build_marktguru, industries_from_settings
+from app.ai.glossary import queries_for_interest
 from app.ai.matcher import match_offers
 from app.domain import Offer
 from app.formatting import ensure_utc, utcnow
@@ -33,7 +34,14 @@ def reset_scan_state() -> None:
 
 
 def try_start_scan(trigger: str) -> str:
+    """Schedule a scan on the running event loop. Call this from async code."""
+
     if _state["running"]:
+        return "busy"
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        log.error("scan requested outside the event loop")
         return "busy"
     _state["running"] = True
     _state["trigger"] = trigger
@@ -47,7 +55,7 @@ def try_start_scan(trigger: str) -> str:
             _state["running"] = False
             _state["trigger"] = ""
 
-    asyncio.create_task(wrapper())
+    loop.create_task(wrapper())
     return "started"
 
 
@@ -157,16 +165,22 @@ async def _collect_offers(adapter, place, interests, preferred, stores) -> list[
     nearby_chains = [store.chain for store in stores if store.chain]
     found: dict[str, Offer] = {}
     for interest in interests:
-        batch = await adapter.search_offers(place, interest, limit=30)
-        for offer in batch:
-            if preferred and not any(same_chain(offer.chain, item) or same_chain(offer.store_name, item) for item in preferred):
-                continue
-            if nearby_chains and offer.chain and not any(same_chain(offer.chain, chain) for chain in nearby_chains):
-                continue
-            found.setdefault(offer.external_id or offer.product, offer)
-        if len(found) >= 200:
-            break
+        queries = queries_for_interest(interest) or [interest]
+        for query in queries:
+            batch = await adapter.search_offers(place, query, limit=24)
+            _keep_offers(batch, preferred, nearby_chains, found)
+            if len(found) >= 200:
+                return list(found.values())
     return list(found.values())
+
+
+def _keep_offers(batch, preferred, nearby_chains, found: dict[str, Offer]) -> None:
+    for offer in batch:
+        if preferred and not any(same_chain(offer.chain, item) or same_chain(offer.store_name, item) for item in preferred):
+            continue
+        if nearby_chains and offer.chain and not any(same_chain(offer.chain, chain) for chain in nearby_chains):
+            continue
+        found.setdefault(offer.external_id or offer.product, offer)
 
 
 def _dedupe_stores(stores):

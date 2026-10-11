@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 
+from app.ai.glossary import queries_for_interest
 from app.ai.keyword import keyword_matches, score_interest
 from app.domain import Offer, StoreLocation
 
@@ -24,6 +25,13 @@ def offer(**overrides) -> Offer:
     )
     data.update(overrides)
     return Offer(**data)
+
+
+def test_english_interests_search_the_german_index():
+    assert queries_for_interest("beer") == ["Bier OR Pils"]
+    assert queries_for_interest("Greek yogurt") == ["griechisch Joghurt"]
+    assert "Parkside" in queries_for_interest("Parkside tools")
+    assert queries_for_interest("Werkzeugkasten") == ["Werkzeugkasten OR Werkzeug"]
 
 
 def test_exact_and_synonym_scores():
