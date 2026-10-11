@@ -1,6 +1,10 @@
 # Rabbat-IQ
 
-Rabbat-IQ is a self-hosted tool that watches supermarket offers near a postal code and tells you when something matches what you actually buy. Interests, flyer images, and API keys stay on your machine. The model and the Telegram bot are optional, and both use credentials you provide.
+Rabbat-IQ is a self-hosted tool that watches supermarket offers near a postal code and tells you when something matches what you actually buy.
+
+![Rabbat-IQ overview after a scan of München, 80333, 1 km](docs/overview.png)
+
+Interests, flyer images, and API keys stay on your machine. The model and the Telegram bot are optional, and both use credentials you provide.
 
 It is aimed at Germany and Austria. The first data source is [Marktguru](https://www.marktguru.de/). Direct chain scrapers can be added beside it.
 
