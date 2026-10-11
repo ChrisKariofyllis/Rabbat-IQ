@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{ flyer.chain }} flyer · Markthunter{% endblock %}
+{% block heading %}{{ flyer.chain }}{% endblock %}
+{% block content %}
+<p class="lede">{{ flyer.industry }}{% if flyer.when %} · valid {{ flyer.when }}{% endif %} · {{ flyer.page_count }} pages · {{ flyer.offer_count }} offers listed by the source.</p>
+{% if flyer.source_url %}
+<p><a href="{{ flyer.source_url }}" target="_blank" rel="noopener noreferrer">Open this leaflet on Marktguru</a></p>
+{% endif %}
+{% if flyer.pages %}
+<div class="page-grid">
+  {% for page in flyer.pages %}
+  <figure>
+    <img src="{{ page }}" alt="{{ flyer.chain }} flyer page {{ loop.index }}">
+    <figcaption>Page {{ loop.index }}</figcaption>
+  </figure>
+  {% endfor %}
+</div>
+<p class="hint">The first few pages are shown here. Vision matching, when enabled, reads the cover only, up to the page budget in settings.</p>
+{% else %}
+<div class="empty"><p>This leaflet has no preview images.</p></div>
+{% endif %}
+{% endblock %}

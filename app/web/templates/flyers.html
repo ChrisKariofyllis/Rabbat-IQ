@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Flyers · Markthunter{% endblock %}
+{% block heading %}Current flyers{% endblock %}
+{% block content %}
+{% if flyers %}
+<div class="cards flyers">
+  {% for flyer in flyers %}
+  <a class="flyer" href="/flyers/{{ flyer.id }}">
+    {% if flyer.cover_url %}
+    <img src="{{ flyer.cover_url }}" alt="{{ flyer.chain }} flyer cover">
+    {% else %}
+    <div class="flyer-fallback">{{ flyer.chain }}</div>
+    {% endif %}
+    <div class="flyer-meta">
+      <strong>{{ flyer.chain }}</strong>
+      <span>{{ flyer.industry }}{% if flyer.when %} · {{ flyer.when }}{% endif %}</span>
+      <span class="hint">{{ flyer.page_count }} pages · {{ flyer.offer_count }} offers</span>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty">
+  <h2>No flyers yet</h2>
+  <p>The next scan saves supermarket, drugstore, and hardware leaflets for your postal code. Furniture catalogues are left out unless you switch retailer groups to “every retailer”.</p>
+</div>
+{% endif %}
+{% endblock %}
