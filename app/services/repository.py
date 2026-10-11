@@ -165,6 +165,7 @@ def replace_flyers(flyers: list[FlyerDTO]) -> None:
                     pages_json=json.dumps(item.page_urls),
                     source_url=item.source_url,
                     source=item.source,
+                    scope=item.scope or "",
                 )
             )
 
@@ -172,7 +173,14 @@ def replace_flyers(flyers: list[FlyerDTO]) -> None:
 def list_flyers() -> list[Flyer]:
     with session_scope() as session:
         rows = list(session.scalars(select(Flyer)))
-        rows.sort(key=lambda row: (-(row.offer_count or 0), row.chain or "", row.title or ""))
+        rows.sort(
+            key=lambda row: (
+                0 if (row.scope or "") == "local" else 1,
+                -(row.offer_count or 0),
+                row.chain or "",
+                row.title or "",
+            )
+        )
         for row in rows:
             session.expunge(row)
         return rows

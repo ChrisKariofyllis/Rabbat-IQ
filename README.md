@@ -22,6 +22,15 @@ Leaflets are loaded for that postal code. Branches come from Marktguru’s store
 
 A chain can still be absent. If its closest branch in Marktguru’s lists is farther than the radius, it is left off the Stores page. Raising the radius in Settings is the way to include it. The map is a relative plot of those saved branches, not a street map.
 
+## Flyer scope
+
+Flyers are the leaflets Marktguru returns for your postal code. They are not a dump of every German leaflet. Each one is labeled:
+
+- **Local** — one booklet (`spreadLeaflet` is false and `leafletCount` is 1). This is the tighter match for your area.
+- **Broader** — a spread campaign, or a flight that stacks more than one leaflet. The offers still reach your postal code, and the same booklet is shared across many stores.
+
+Local booklets are listed first. Broader ones stay on the page because weekly chain offers often live in those shared campaigns.
+
 ## Run with Docker
 
 ```bash
