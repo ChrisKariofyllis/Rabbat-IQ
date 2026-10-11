@@ -2,6 +2,19 @@
 {% block title %}Stores · Rabbat-IQ{% endblock %}
 {% block heading %}Stores inside the radius{% endblock %}
 {% block content %}
+{% if chains %}
+<form class="filter-bar" method="get" action="/stores">
+  <label for="store">Offers at
+    <select id="store" name="store">
+      <option value="">All stores</option>
+      {% for chain in chains %}
+      <option value="{{ chain }}" {% if selected_store == chain %}selected{% endif %}>{{ chain }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button type="submit">Show</button>
+</form>
+{% endif %}
 {% if stores %}
 {% if has_map %}
 <section class="map-layout">
@@ -46,6 +59,20 @@
   {% endfor %}
 </ul>
 {% endif %}
+<section>
+  <h2>Offers for your interests{% if selected_store %} at {{ selected_store }}{% endif %}</h2>
+  {% if store_offers %}
+  <div class="cards">
+    {% for deal in store_offers %}
+    {% include "deal.html" %}
+    {% endfor %}
+  </div>
+  {% elif not has_interests %}
+  <div class="empty"><p>Add an interest, then scan. This list shows offers from these stores that match what you buy.</p></div>
+  {% else %}
+  <div class="empty"><p>No saved offers match your interests{% if selected_store %} at {{ selected_store }}{% endif %}. A new scan fills this in.</p></div>
+  {% endif %}
+</section>
 {% else %}
 <div class="empty">
   <h2>No stores saved</h2>

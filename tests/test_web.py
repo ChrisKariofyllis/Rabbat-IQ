@@ -1,7 +1,9 @@
 from fastapi.testclient import TestClient
 
 from app.config import EnvSettings
+from app.domain import Offer, StoreLocation
 from app.main import create_app
+from app.services import repository
 from app.services.scan import reset_scan_state
 
 
@@ -80,6 +82,32 @@ def test_pages_settings_and_interests(tmp_path):
         assert client.get("/no-such-page").status_code == 404
         assert client.get("/health").json()["ok"] is True
         assert client.get("/robots.txt").text.startswith("User-agent")
+
+
+def test_store_page_filters_interest_offers(tmp_path):
+    with make_client(tmp_path) as client:
+        client.post("/interests", data={"text": "yogurt"})
+        repository.replace_stores(
+            [
+                StoreLocation("1", "Netto Sinzing", "Netto", "Hauptstr", "93161", "Sinzing", 48.9, 11.9, 2000, "", "marktguru"),
+                StoreLocation("2", "NORMA Sinzing", "NORMA", "Dorf", "93161", "Sinzing", 48.91, 12.0, 2600, "", "marktguru"),
+            ]
+        )
+        repository.replace_offers(
+            [
+                Offer("a", "marktguru", "Joghurt", "", "", 0.59, None, "", None, "Netto", "Netto", None, None, "", "https://www.marktguru.de/offers/a"),
+                Offer("b", "marktguru", "Energy Drink", "", "", 0.99, None, "", None, "NORMA", "NORMA", None, None, "", "https://www.marktguru.de/offers/b"),
+            ]
+        )
+        page = client.get("/stores")
+        assert "All stores" in page.text
+        assert "Netto Sinzing" in page.text
+        assert "Joghurt" in page.text
+        assert "Energy Drink" not in page.text
+        filtered = client.get("/stores", params={"store": "Netto"})
+        assert "Netto Sinzing" in filtered.text
+        assert "NORMA Sinzing" not in filtered.text
+        assert "Joghurt" in filtered.text
 
 
 def test_basic_auth_protects_pages_but_not_health(tmp_path):
