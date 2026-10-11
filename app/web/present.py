@@ -2,6 +2,7 @@
 
 import json
 
+from app.adapters.marktguru import offer_link
 from app.ai.keyword import score_interest
 from app.formatting import discount_label, format_distance, format_euro, format_when, validity_label
 from app.textutil import normalize, same_chain
@@ -114,10 +115,19 @@ def offer_view(offer) -> dict:
         "discount": discount_label(price, old),
         "when": validity_label(getattr(offer, "valid_from", None), getattr(offer, "valid_to", None)),
         "image_url": getattr(offer, "image_url", "") or "",
-        "link_url": getattr(offer, "link_url", "") or "",
+        "link_url": _public_link(offer),
         "unit": getattr(offer, "unit", "") or "",
         "reference_price": format_euro(reference) if reference else "",
     }
+
+
+def _public_link(offer) -> str:
+    raw = getattr(offer, "link_url", "") or ""
+    external_id = str(getattr(offer, "external_id", "") or "")
+    site = "https://www.marktguru.at" if "marktguru.at" in raw else "https://www.marktguru.de"
+    if not external_id and raw:
+        return raw
+    return offer_link({"id": external_id, "externalUrl": raw}, site=site)
 
 
 def match_view(row) -> dict:

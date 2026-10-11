@@ -84,6 +84,34 @@ def test_pages_settings_and_interests(tmp_path):
         assert client.get("/robots.txt").text.startswith("User-agent")
 
 
+def test_saved_search_links_open_the_offer_page(tmp_path):
+    with make_client(tmp_path) as client:
+        repository.replace_offers(
+            [
+                Offer(
+                    "25289747",
+                    "marktguru",
+                    "Joghurt",
+                    "",
+                    "",
+                    0.59,
+                    None,
+                    "",
+                    None,
+                    "Kaufland",
+                    "Kaufland",
+                    None,
+                    None,
+                    "",
+                    "https://www.marktguru.de/suche?q=Joghurt",
+                )
+            ]
+        )
+        page = client.get("/offers")
+        assert "https://www.marktguru.de/offers/25289747" in page.text
+        assert "suche?q=" not in page.text
+
+
 def test_store_page_filters_interest_offers(tmp_path):
     with make_client(tmp_path) as client:
         client.post("/interests", data={"text": "yogurt"})
@@ -108,6 +136,25 @@ def test_store_page_filters_interest_offers(tmp_path):
         assert "Netto Sinzing" in filtered.text
         assert "NORMA Sinzing" not in filtered.text
         assert "Joghurt" in filtered.text
+
+
+def test_offers_page_can_keep_only_interest_matches(tmp_path):
+    with make_client(tmp_path) as client:
+        client.post("/interests", data={"text": "yogurt"})
+        repository.replace_offers(
+            [
+                Offer("a", "marktguru", "Joghurt", "", "", 0.59, None, "", None, "Netto", "Netto", None, None, "", "https://www.marktguru.de/offers/a"),
+                Offer("b", "marktguru", "Energy Drink", "", "", 0.99, None, "", None, "NORMA", "NORMA", None, None, "", "https://www.marktguru.de/offers/b"),
+            ]
+        )
+        everything = client.get("/offers")
+        assert "Joghurt" in everything.text
+        assert "Energy Drink" in everything.text
+        assert "Only offers that match my interests" in everything.text
+        filtered = client.get("/offers", params={"interests": "1"})
+        assert "Joghurt" in filtered.text
+        assert "Energy Drink" not in filtered.text
+        assert "checked" in filtered.text
 
 
 def test_basic_auth_protects_pages_but_not_health(tmp_path):
