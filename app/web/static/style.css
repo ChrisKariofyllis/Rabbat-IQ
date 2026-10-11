@@ -436,6 +436,21 @@ main { display: flex; flex-direction: column; gap: 28px; padding-top: 12px; }
 
 .flyer-meta strong { font-size: var(--body); }
 
+.scope {
+  display: inline-block;
+  width: fit-content;
+  font-size: var(--caption);
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.scope-local { color: var(--ok-ink); }
+
+.scope-broader { color: var(--accent-ink); }
+
+.scope-postal { color: var(--secondary); }
+
 .flyer-meta span { color: var(--secondary); font-size: var(--footnote); }
 
 .deal-top {
