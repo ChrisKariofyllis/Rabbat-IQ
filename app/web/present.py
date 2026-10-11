@@ -76,7 +76,14 @@ def match_view(row) -> dict:
     return view
 
 
+SCOPE_LABELS = {
+    "local": "Local",
+    "broader": "Broader",
+}
+
+
 def flyer_view(row) -> dict:
+    scope = getattr(row, "scope", "") or ""
     return {
         "id": row.id,
         "title": row.title or row.chain or "Flyer",
@@ -88,6 +95,8 @@ def flyer_view(row) -> dict:
         "cover_url": row.cover_url or "",
         "pages": _pages(row.pages_json),
         "source_url": row.source_url or "",
+        "scope": scope,
+        "scope_label": SCOPE_LABELS.get(scope, "For this postal code"),
     }
 
 

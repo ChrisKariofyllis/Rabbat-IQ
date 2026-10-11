@@ -6,6 +6,7 @@ from app.adapters.marktguru import (
     keep_flyer,
     leaflets_by_chain,
     parse_homepage_keys,
+    parse_flight,
     parse_offer,
     place_from_locations,
     selected_industries,
@@ -84,6 +85,21 @@ async def test_search_sends_zip_and_key():
             )
     assert seen == {"zip": "10115", "query": "joghurt", "key": "secret"}
     assert offers[0].brand == "K-Classic"
+
+
+def test_flyer_scope_labels_a_single_booklet_as_local():
+    local = parse_flight(
+        {"id": 1, "mainLeafletId": 9, "spreadLeaflet": False, "leafletCount": 1, "advertiser": {"name": "Lidl"}},
+        cdn="https://cdn.marktguru.de",
+        site="https://www.marktguru.de",
+    )
+    broader = parse_flight(
+        {"id": 2, "mainLeafletId": 8, "spreadLeaflet": True, "leafletCount": 21, "advertiser": {"name": "EDEKA"}},
+        cdn="https://cdn.marktguru.de",
+        site="https://www.marktguru.de",
+    )
+    assert local.scope == "local"
+    assert broader.scope == "broader"
 
 
 def test_place_from_locations_uses_the_postal_centroid():
