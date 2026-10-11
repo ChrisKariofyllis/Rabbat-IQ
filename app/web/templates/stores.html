@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Stores · Markthunter{% endblock %}
+{% block title %}Stores · Rabbat-IQ{% endblock %}
 {% block heading %}Stores inside the radius{% endblock %}
 {% block content %}
 {% if stores %}
@@ -19,7 +19,7 @@
       {% endif %}
       {% endfor %}
     </svg>
-    <p class="hint">Positions are relative to each other, not a street map. The gold dot is your postal code.</p>
+    <p class="hint">Positions are relative to each other, not a street map. The blue dot is your postal code.</p>
   </div>
   <ul class="store-list">
     {% for store in stores %}
