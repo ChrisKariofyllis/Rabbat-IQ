@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Matches · Markthunter{% endblock %}
+{% block heading %}Matches{% endblock %}
+{% block content %}
+<div class="section-head">
+  <p class="lede">A match is kept once per offer, interest, price, and validity date. The same deal is not sent to Telegram again.</p>
+  {% if matches %}
+  <form method="post" action="/matches/clear">
+    <button class="secondary" type="submit">Clear history</button>
+  </form>
+  {% endif %}
+</div>
+{% if matches %}
+<div class="cards">
+  {% for deal in matches %}
+  {% include "deal.html" %}
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty">
+  <h2>No matches saved</h2>
+  <p>When a scan finds an offer that fits an interest, it lands here. Connect Telegram in settings if you also want a message.</p>
+</div>
+{% endif %}
+{% endblock %}
