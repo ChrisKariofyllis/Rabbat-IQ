@@ -1,8 +1,8 @@
 """Marktguru adapter for Germany (marktguru.de) and Austria (marktguru.at).
 
 This is an unofficial client. It calls the same public JSON API the Marktguru
-website uses. Keys can be supplied with MARKTHUNTER_MARKTGURU_API_KEY and
-MARKTHUNTER_MARKTGURU_CLIENT_KEY. When they are empty, the adapter reads the
+website uses. Keys can be supplied with RABBAT_IQ_MARKTGURU_API_KEY and
+RABBAT_IQ_MARKTGURU_CLIENT_KEY. When they are empty, the adapter reads the
 keys embedded in the public homepage and caches them under the data directory.
 
 You are responsible for complying with Marktguru's terms of use.
@@ -23,7 +23,7 @@ from app.textutil import same_chain
 
 log = logging.getLogger(__name__)
 
-USER_AGENT = "Markthunter/0.1 (personal self-hosted deal scanner)"
+USER_AGENT = "Rabbat-IQ/0.1 (personal self-hosted deal scanner)"
 KEY_TTL_SECONDS = 12 * 60 * 60
 
 HOSTS = {
@@ -94,7 +94,7 @@ def parse_homepage_keys(html: str) -> tuple[str, str]:
             return str(config["apiKey"]), str(config.get("clientKey") or "")
     raise AdapterError(
         "Could not read Marktguru API keys from the public homepage. "
-        "Set MARKTHUNTER_MARKTGURU_API_KEY and MARKTHUNTER_MARKTGURU_CLIENT_KEY."
+        "Set RABBAT_IQ_MARKTGURU_API_KEY and RABBAT_IQ_MARKTGURU_CLIENT_KEY."
     )
 
 
