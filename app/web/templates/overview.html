@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Overview · Markthunter{% endblock %}
+{% block title %}Overview · Rabbat-IQ{% endblock %}
 {% block heading %}What’s near you{% endblock %}
 {% block content %}
 <section class="status-row" aria-label="Last scan">
@@ -12,16 +12,16 @@
     <p class="hint">{{ scan.when }} · started from {{ scan.trigger }}{% if scan.next %} · next automatic scan {{ scan.next }}{% endif %}</p>
     {% else %}
     <p class="status-title">No scan yet</p>
-    <p class="hint">Set a postal code and an interest, then use Scan now. After that, Markthunter repeats the check on your interval.</p>
+    <p class="hint">Set a postal code and an interest, then use Scan now. After that, Rabbat-IQ repeats the check on your interval.</p>
     {% endif %}
   </div>
 </section>
 
 <section class="stats" aria-label="Counts">
-  <a href="/stores"><strong>{{ stats.stores }}</strong><span>stores in range</span></a>
-  <a href="/flyers"><strong>{{ stats.flyers }}</strong><span>current flyers</span></a>
-  <a href="/offers"><strong>{{ stats.offers }}</strong><span>offers saved</span></a>
-  <a href="/matches"><strong>{{ stats.matches }}</strong><span>matches</span></a>
+  <a href="/stores"><span>Stores in range</span><strong>{{ stats.stores }}</strong></a>
+  <a href="/flyers"><span>Current flyers</span><strong>{{ stats.flyers }}</strong></a>
+  <a href="/offers"><span>Offers saved</span><strong>{{ stats.offers }}</strong></a>
+  <a href="/matches"><span>Matches</span><strong>{{ stats.matches }}</strong></a>
 </section>
 
 {% if show_setup %}
