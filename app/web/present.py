@@ -2,7 +2,9 @@
 
 import json
 
+from app.ai.keyword import score_interest
 from app.formatting import discount_label, format_distance, format_euro, format_when, validity_label
+from app.textutil import normalize, same_chain
 
 NAV = (
     {"id": "overview", "href": "/", "label": "Overview"},
@@ -36,6 +38,65 @@ NOTICES = {
 
 def notice_text(code: str | None) -> str:
     return NOTICES.get(code or "", "")
+
+
+def store_chain_options(stores) -> list[str]:
+    options: list[str] = []
+    seen: set[str] = set()
+    for store in stores:
+        label = (getattr(store, "chain", "") or getattr(store, "name", "") or "").strip()
+        key = label.casefold()
+        if not label or key in seen:
+            continue
+        seen.add(key)
+        options.append(label)
+    return options
+
+
+def matched_interest(offer, interests: list[str]) -> str:
+    words = normalize(
+        " ".join(
+            [
+                getattr(offer, "product", "") or "",
+                getattr(offer, "brand", "") or "",
+                getattr(offer, "description", "") or "",
+            ]
+        )
+    ).split()
+    best = ""
+    best_score = 0.0
+    for interest in interests:
+        scored = score_interest(words, interest)
+        if scored and scored[0] >= best_score:
+            best_score = scored[0]
+            best = interest
+    return best
+
+
+def interest_offers(offers, stores, interests: list[str], selected: str = ""):
+    """Offers that match an interest and belong to a saved nearby store."""
+
+    local = [(getattr(store, "chain", "") or "", getattr(store, "name", "") or "") for store in stores]
+    chosen = []
+    for offer in offers:
+        chain = getattr(offer, "chain", "") or ""
+        name = getattr(offer, "store_name", "") or ""
+        if local and not _belongs_to_store(chain, name, local):
+            continue
+        if selected and not (same_chain(chain, selected) or same_chain(name, selected)):
+            continue
+        label = matched_interest(offer, interests)
+        if interests and not label:
+            continue
+        chosen.append((offer, label))
+    return chosen
+
+
+def _belongs_to_store(chain: str, name: str, local: list[tuple[str, str]]) -> bool:
+    for store_chain, store_name in local:
+        if same_chain(chain, store_chain) or same_chain(chain, store_name) or same_chain(name, store_chain):
+            return True
+    return False
 
 
 def offer_view(offer) -> dict:
