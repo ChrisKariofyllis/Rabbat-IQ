@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Interests · Markthunter{% endblock %}
+{% block title %}Interests · Rabbat-IQ{% endblock %}
 {% block heading %}Interests{% endblock %}
 {% block content %}
 <p class="lede">These are the products and categories the scan looks for. Wording can be German or English. Semantic mode, with your own model, also catches equivalents such as “Greek yogurt” and “Griechischer Joghurt”.</p>
@@ -22,7 +22,7 @@
   <li>
     <span>{{ interest.text }}</span>
     <form method="post" action="/interests/{{ interest.id }}/delete">
-      <button class="secondary" type="submit">Remove</button>
+      <button class="secondary destructive" type="submit">Remove</button>
     </form>
   </li>
   {% endfor %}
