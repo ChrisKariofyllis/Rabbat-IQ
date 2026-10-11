@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Overview · Markthunter{% endblock %}
+{% block heading %}What’s near you{% endblock %}
+{% block content %}
+<section class="status-row" aria-label="Last scan">
+  <div>
+    {% if scan.running %}
+    <p class="status-title">Scan in progress</p>
+    <p class="hint">Marktguru is being checked. Matches show up here, and in Telegram if you connected it.</p>
+    {% elif scan.message %}
+    <p class="status-title">{{ scan.message }}</p>
+    <p class="hint">{{ scan.when }} · started from {{ scan.trigger }}{% if scan.next %} · next automatic scan {{ scan.next }}{% endif %}</p>
+    {% else %}
+    <p class="status-title">No scan yet</p>
+    <p class="hint">Set a postal code and an interest, then use Scan now. After that, Markthunter repeats the check on your interval.</p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="stats" aria-label="Counts">
+  <a href="/stores"><strong>{{ stats.stores }}</strong><span>stores in range</span></a>
+  <a href="/flyers"><strong>{{ stats.flyers }}</strong><span>current flyers</span></a>
+  <a href="/offers"><strong>{{ stats.offers }}</strong><span>offers saved</span></a>
+  <a href="/matches"><strong>{{ stats.matches }}</strong><span>matches</span></a>
+</section>
+
+{% if show_setup %}
+<section class="panel">
+  <h2>Set up this machine</h2>
+  <ol class="checklist">
+    {% for step in checklist %}
+    <li class="{{ 'done' if step.done else '' }}">
+      <a href="{{ step.href }}">{{ step.label }}</a>
+      {% if step.optional and not step.done %}<span class="hint">Optional</span>{% endif %}
+      {% if step.done %}<span class="hint">Done</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+{% endif %}
+
+<section>
+  <div class="section-head">
+    <h2>Recent matches</h2>
+    <a href="/matches">All matches</a>
+  </div>
+  {% if matches %}
+  <div class="cards">
+    {% for deal in matches %}
+    {% include "deal.html" %}
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty">
+    <h3>Nothing matched yet</h3>
+    <p>Interests such as “Greek yogurt”, “beer”, or “Werkzeugkasten” are compared with offers from stores inside your radius. Keyword matching works before you add an AI key.</p>
+  </div>
+  {% endif %}
+</section>
+
+{% if flyers %}
+<section>
+  <div class="section-head">
+    <h2>Flyers this week</h2>
+    <a href="/flyers">All flyers</a>
+  </div>
+  <div class="cards flyers">
+    {% for flyer in flyers %}
+    <a class="flyer" href="/flyers/{{ flyer.id }}">
+      {% if flyer.cover_url %}
+      <img src="{{ flyer.cover_url }}" alt="{{ flyer.chain }} flyer cover">
+      {% else %}
+      <div class="flyer-fallback">{{ flyer.chain }}</div>
+      {% endif %}
+      <div class="flyer-meta">
+        <strong>{{ flyer.chain }}</strong>
+        <span>{{ flyer.when }}</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}
