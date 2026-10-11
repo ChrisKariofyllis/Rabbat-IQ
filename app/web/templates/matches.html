@@ -1,12 +1,12 @@
 {% extends "base.html" %}
-{% block title %}Matches · Markthunter{% endblock %}
+{% block title %}Matches · Rabbat-IQ{% endblock %}
 {% block heading %}Matches{% endblock %}
 {% block content %}
 <div class="section-head">
   <p class="lede">A match is kept once per offer, interest, price, and validity date. The same deal is not sent to Telegram again.</p>
   {% if matches %}
   <form method="post" action="/matches/clear">
-    <button class="secondary" type="submit">Clear history</button>
+    <button class="secondary destructive" type="submit">Clear history</button>
   </form>
   {% endif %}
 </div>
