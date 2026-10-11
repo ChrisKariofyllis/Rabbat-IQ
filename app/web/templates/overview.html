@@ -74,6 +74,7 @@
       {% endif %}
       <div class="flyer-meta">
         <strong>{{ flyer.chain }}</strong>
+        <span class="scope scope-{{ flyer.scope or 'postal' }}">{{ flyer.scope_label }}</span>
         <span>{{ flyer.when }}</span>
       </div>
     </a>

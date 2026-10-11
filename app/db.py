@@ -5,7 +5,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.models import Base
@@ -27,6 +27,19 @@ def init_db(url: str) -> None:
     engine = create_engine(url, connect_args=connect_args)
     SessionLocal = sessionmaker(bind=engine, expire_on_commit=False, autoflush=False)
     Base.metadata.create_all(engine)
+    _ensure_flyer_scope(engine)
+
+
+def _ensure_flyer_scope(bound) -> None:
+    """Add flyer scope on databases created before that column existed."""
+
+    if bound.dialect.name != "sqlite":
+        return
+    columns = {column["name"] for column in inspect(bound).get_columns("flyers")}
+    if "scope" in columns:
+        return
+    with bound.begin() as connection:
+        connection.execute(text("ALTER TABLE flyers ADD COLUMN scope VARCHAR(16) DEFAULT ''"))
 
 
 @contextmanager

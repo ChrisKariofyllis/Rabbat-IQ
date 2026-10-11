@@ -3,6 +3,7 @@
 {% block heading %}Current flyers{% endblock %}
 {% block content %}
 {% if flyers %}
+<p class="lede">These are the leaflets Marktguru distributes to your postal code. Local is a single booklet. Broader is a chain campaign shared across many booklets. Local ones are listed first.</p>
 <div class="cards flyers">
   {% for flyer in flyers %}
   <a class="flyer" href="/flyers/{{ flyer.id }}">
@@ -13,6 +14,7 @@
     {% endif %}
     <div class="flyer-meta">
       <strong>{{ flyer.chain }}</strong>
+      <span class="scope scope-{{ flyer.scope or 'postal' }}">{{ flyer.scope_label }}</span>
       <span>{{ flyer.industry }}{% if flyer.when %} · {{ flyer.when }}{% endif %}</span>
       <span class="hint">{{ flyer.page_count }} pages · {{ flyer.offer_count }} offers</span>
     </div>

@@ -2,7 +2,8 @@
 {% block title %}{{ flyer.chain }} flyer · Rabbat-IQ{% endblock %}
 {% block heading %}{{ flyer.chain }}{% endblock %}
 {% block content %}
-<p class="lede">{{ flyer.industry }}{% if flyer.when %} · valid {{ flyer.when }}{% endif %} · {{ flyer.page_count }} pages · {{ flyer.offer_count }} offers listed by the source.</p>
+<p class="lede"><span class="scope scope-{{ flyer.scope or 'postal' }}">{{ flyer.scope_label }}</span> · {{ flyer.industry }}{% if flyer.when %} · valid {{ flyer.when }}{% endif %} · {{ flyer.page_count }} pages · {{ flyer.offer_count }} offers listed by the source.</p>
+<p class="hint">{% if flyer.scope == 'local' %}This is a single booklet for your postal code.{% elif flyer.scope == 'broader' %}This campaign is shared across many booklets. It is still one of the leaflets Marktguru distributes to your postal code.{% else %}This leaflet was saved for your postal code.{% endif %}</p>
 {% if flyer.source_url %}
 <p><a href="{{ flyer.source_url }}" target="_blank" rel="noopener noreferrer">Open this leaflet on Marktguru</a></p>
 {% endif %}
