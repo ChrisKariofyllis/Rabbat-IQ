@@ -31,6 +31,10 @@ Flyers are the leaflets Marktguru returns for your postal code. They are not a d
 
 Local booklets are listed first. Broader ones stay on the page because weekly chain offers often live in those shared campaigns.
 
+## Offer links
+
+Open offer uses a direct product URL when the source has one, such as a Lidl product page or a Kaufland link that names an article id. Category overviews, ad trackers, and Marktguru search URLs are not used. When no specific product URL exists, the link is the Marktguru offer page at `/offers/{id}`.
+
 ## Run with Docker
 
 ```bash
