@@ -9,11 +9,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class EnvSettings(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="MARKTHUNTER_", extra="ignore")
+    model_config = SettingsConfigDict(env_prefix="RABBAT_IQ_", extra="ignore")
 
     host: str = "0.0.0.0"
     port: int = 8000
-    database_url: str = "sqlite:///./data/markthunter.db"
+    database_url: str = "sqlite:///./data/rabbat-iq.db"
     data_dir: str = "./data"
     log_level: str = "INFO"
     disable_scheduler: bool = False
