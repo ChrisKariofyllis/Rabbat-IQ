@@ -5,11 +5,15 @@ __pycache__/
 .mypy_cache/
 .env
 data/
+.impeccable/config.local.json
 *.db
 .DS_Store
+skills-lock.json
 
 .agents/
-.cursor/skills/
+.cursor/skills/*
+!.cursor/skills/impeccable/
+!.cursor/skills/impeccable/**
 .cursor/rules/apple-design.mdc
 ~/.agents/skills/apple-design
 ~/.cursor/skills/apple-design

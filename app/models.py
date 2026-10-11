@@ -80,6 +80,7 @@ class Flyer(Base):
     pages_json: Mapped[str] = mapped_column(Text, default="[]")
     source_url: Mapped[str] = mapped_column(Text, default="")
     source: Mapped[str] = mapped_column(String(40), default="marktguru")
+    scope: Mapped[str] = mapped_column(String(16), default="")
 
 
 class Offer(Base):

@@ -3,6 +3,7 @@
 {% block heading %}Interests{% endblock %}
 {% block content %}
 <p class="lede">These are the products and categories the scan looks for. Wording can be German or English. Semantic mode, with your own model, also catches equivalents such as “Greek yogurt” and “Griechischer Joghurt”.</p>
+<div class="cluster">
 <form method="post" action="/interests" class="interest-add">
   <label for="interest-text">Add an interest</label>
   <div class="search-row">
@@ -15,6 +16,7 @@
   <button type="button" class="chip" data-fill="Greek yogurt">Greek yogurt</button>
   <button type="button" class="chip" data-fill="beer">beer</button>
   <button type="button" class="chip" data-fill="Werkzeugkasten">Werkzeugkasten</button>
+</div>
 </div>
 {% if interests %}
 <ul class="interest-list">

@@ -2,7 +2,10 @@
 
 import json
 
+from app.adapters.marktguru import offer_link
+from app.ai.keyword import score_interest
 from app.formatting import discount_label, format_distance, format_euro, format_when, validity_label
+from app.textutil import normalize, same_chain
 
 NAV = (
     {"id": "overview", "href": "/", "label": "Overview"},
@@ -14,7 +17,7 @@ NAV = (
     {"id": "settings", "href": "/settings", "label": "Settings"},
 )
 
-PALETTE = ("#1e6a43", "#b42318", "#1d4e89", "#8a5a00", "#5c3d8f", "#0f6e6e", "#9a3d6a")
+PIN_COLORS = tuple(f"var(--color-pin-{index})" for index in range(1, 8))
 
 NOTICES = {
     "saved": "Settings saved.",
@@ -38,6 +41,65 @@ def notice_text(code: str | None) -> str:
     return NOTICES.get(code or "", "")
 
 
+def store_chain_options(stores) -> list[str]:
+    options: list[str] = []
+    seen: set[str] = set()
+    for store in stores:
+        label = (getattr(store, "chain", "") or getattr(store, "name", "") or "").strip()
+        key = label.casefold()
+        if not label or key in seen:
+            continue
+        seen.add(key)
+        options.append(label)
+    return options
+
+
+def matched_interest(offer, interests: list[str]) -> str:
+    words = normalize(
+        " ".join(
+            [
+                getattr(offer, "product", "") or "",
+                getattr(offer, "brand", "") or "",
+                getattr(offer, "description", "") or "",
+            ]
+        )
+    ).split()
+    best = ""
+    best_score = 0.0
+    for interest in interests:
+        scored = score_interest(words, interest)
+        if scored and scored[0] >= best_score:
+            best_score = scored[0]
+            best = interest
+    return best
+
+
+def interest_offers(offers, stores, interests: list[str], selected: str = ""):
+    """Offers that match an interest and belong to a saved nearby store."""
+
+    local = [(getattr(store, "chain", "") or "", getattr(store, "name", "") or "") for store in stores]
+    chosen = []
+    for offer in offers:
+        chain = getattr(offer, "chain", "") or ""
+        name = getattr(offer, "store_name", "") or ""
+        if local and not _belongs_to_store(chain, name, local):
+            continue
+        if selected and not (same_chain(chain, selected) or same_chain(name, selected)):
+            continue
+        label = matched_interest(offer, interests)
+        if interests and not label:
+            continue
+        chosen.append((offer, label))
+    return chosen
+
+
+def _belongs_to_store(chain: str, name: str, local: list[tuple[str, str]]) -> bool:
+    for store_chain, store_name in local:
+        if same_chain(chain, store_chain) or same_chain(chain, store_name) or same_chain(name, store_chain):
+            return True
+    return False
+
+
 def offer_view(offer) -> dict:
     price = getattr(offer, "price", None)
     old = getattr(offer, "old_price", None)
@@ -53,10 +115,19 @@ def offer_view(offer) -> dict:
         "discount": discount_label(price, old),
         "when": validity_label(getattr(offer, "valid_from", None), getattr(offer, "valid_to", None)),
         "image_url": getattr(offer, "image_url", "") or "",
-        "link_url": getattr(offer, "link_url", "") or "",
+        "link_url": _public_link(offer),
         "unit": getattr(offer, "unit", "") or "",
         "reference_price": format_euro(reference) if reference else "",
     }
+
+
+def _public_link(offer) -> str:
+    raw = getattr(offer, "link_url", "") or ""
+    external_id = str(getattr(offer, "external_id", "") or "")
+    site = "https://www.marktguru.at" if "marktguru.at" in raw else "https://www.marktguru.de"
+    if not external_id and raw:
+        return raw
+    return offer_link({"id": external_id, "externalUrl": raw}, site=site)
 
 
 def match_view(row) -> dict:
@@ -76,7 +147,14 @@ def match_view(row) -> dict:
     return view
 
 
+SCOPE_LABELS = {
+    "local": "Local",
+    "broader": "Broader",
+}
+
+
 def flyer_view(row) -> dict:
+    scope = getattr(row, "scope", "") or ""
     return {
         "id": row.id,
         "title": row.title or row.chain or "Flyer",
@@ -88,6 +166,8 @@ def flyer_view(row) -> dict:
         "cover_url": row.cover_url or "",
         "pages": _pages(row.pages_json),
         "source_url": row.source_url or "",
+        "scope": scope,
+        "scope_label": SCOPE_LABELS.get(scope, "For this postal code"),
     }
 
 
@@ -120,16 +200,11 @@ def store_views(stores, home: tuple[float | None, float | None] | None = None) -
         return round(x, 2), round(y, 2)
 
     views = []
-    labels_left = 5
     for store in stores:
         point = None
-        show = False
         if store.latitude is not None and store.longitude is not None:
             point = xy(store.latitude, store.longitude)
-            show = labels_left > 0
-            if show:
-                labels_left -= 1
-        views.append(_store_dict(store, point, _color(store.chain or store.name), show))
+        views.append(_store_dict(store, point, _color(store.chain or store.name), False))
     home_point = None
     if home_lat is not None and home_lon is not None:
         hx, hy = xy(home_lat, home_lon)
@@ -164,7 +239,7 @@ def _store_dict(store, point, color, show_label: bool) -> dict:
         "hours": store.opening_hours or "",
         "x": None if point is None else point[0],
         "y": None if point is None else point[1],
-        "color": color or "#1e6a43",
+        "color": color or "var(--color-pin-1)",
         "show_label": show_label,
     }
 
@@ -181,4 +256,4 @@ def _pages(raw: str) -> list[str]:
 
 def _color(name: str) -> str:
     total = sum(ord(char) for char in name or "")
-    return PALETTE[total % len(PALETTE)]
+    return PIN_COLORS[total % len(PIN_COLORS)]

@@ -1,14 +1,14 @@
 <article class="deal">
+  <h2>{{ deal.product }}</h2>
   <div class="deal-top">
     <p class="chain">{{ deal.chain or deal.store_name or "Store" }}</p>
     {% if deal.when %}<p class="when">{{ deal.when }}</p>{% endif %}
   </div>
   {% if deal.image_url %}
   <div class="deal-photo">
-    <img src="{{ deal.image_url }}" alt="">
+    <img src="{{ deal.image_url }}" alt="" loading="lazy" decoding="async">
   </div>
   {% endif %}
-  <h3>{{ deal.product }}</h3>
   {% if deal.brand %}<p class="brand">{{ deal.brand }}</p>{% endif %}
   {% if deal.description %}<p class="desc">{{ deal.description }}</p>{% endif %}
   <div class="price-row">
@@ -20,7 +20,7 @@
   <p class="hint">{{ deal.reference_price }} / {{ deal.unit }}</p>
   {% endif %}
   {% if deal.interest %}
-  <p class="why"><span>{{ deal.interest }}</span> · {{ deal.confidence }} · {{ deal.reason }}</p>
+  <p class="why"><span>{{ deal.interest }}</span>{% if deal.confidence %} · {{ deal.confidence }}{% endif %}{% if deal.reason %} · {{ deal.reason }}{% endif %}</p>
   {% endif %}
   {% if deal.store_name and deal.store_name != deal.chain %}
   <p class="hint">{{ deal.store_name }}</p>

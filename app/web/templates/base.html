@@ -5,16 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow">
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
   <title>{% block title %}Rabbat-IQ{% endblock %}</title>
   <link rel="icon" href="{{ request.url_for('static', path='favicon.svg') }}" type="image/svg+xml">
   <link rel="stylesheet" href="{{ request.url_for('static', path='style.css') }}">
 </head>
 <body data-poll="{{ '1' if poll else '0' }}">
   <a class="skip" href="#content">Skip to content</a>
-  <div class="shell">
-    <aside class="sidebar">
+  <header class="navbar">
+    <div class="frame nav-bar">
       <a class="brand" href="/">
         <img src="{{ request.url_for('static', path='favicon.svg') }}" width="28" height="28" alt="">
         <span>
@@ -22,7 +20,7 @@
           <span class="brand-note">Deals stay on this machine.</span>
         </span>
       </a>
-      <nav aria-label="Sections">
+      <nav id="site-nav" class="site-nav" aria-label="Sections">
         {% for item in nav %}
         <a href="{{ item.href }}" class="{{ 'active' if active == item.id else '' }}" {% if active == item.id %}aria-current="page"{% endif %}>
           <span>{{ item.label }}</span>
@@ -32,44 +30,38 @@
         </a>
         {% endfor %}
       </nav>
-      <form method="post" action="/scan" class="scan-form scan-form-side">
-        <button type="submit" {% if not ready or scanning %}disabled{% endif %}>
-          {{ "Scanning…" if scanning else "Scan now" }}
-        </button>
-      </form>
-      <p class="aside-foot">
-        {% if scheduler_on %}
-        Automatic scans follow the interval in settings.
-        {% else %}
-        The scheduler is off in this process.
-        {% endif %}
-      </p>
-    </aside>
-    <div class="workspace">
-      <header class="top">
-        <p class="kicker">{{ place_label or "No postal code yet" }}</p>
-        <div class="title-row">
-          <h1>{% block heading %}Overview{% endblock %}</h1>
-          <form method="post" action="/scan" class="scan-form scan-form-bar">
-            <button type="submit" {% if not ready or scanning %}disabled{% endif %}>
-              {{ "Scanning…" if scanning else "Scan now" }}
-            </button>
-          </form>
-        </div>
-      </header>
-      <main id="content">
-        {% if notice %}
-        <p class="banner ok" role="status">{{ notice }}</p>
-        {% endif %}
-        {% if error %}
-        <p class="banner bad" role="alert">{{ error }}</p>
-        {% endif %}
-        {% block content %}{% endblock %}
-      </main>
-      <footer>
-        <p>Personal self-hosted tool. Offer data comes from Marktguru. You are responsible for complying with each source’s terms.</p>
-      </footer>
+      <div class="nav-actions">
+        <form method="post" action="/scan" class="scan-form">
+          <button type="submit" {% if not ready or scanning %}disabled{% endif %}>
+            {{ "Scanning…" if scanning else "Scan now" }}
+          </button>
+        </form>
+        <button class="nav-toggle secondary" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+      </div>
     </div>
+  </header>
+  <div class="frame workspace">
+    <header class="top">
+      <h1>{% block heading %}Overview{% endblock %}</h1>
+      <p class="place">{{ place_label or "No postal code yet" }}</p>
+    </header>
+    <main id="content">
+      {% if notice %}
+      <p class="banner ok" role="status">{{ notice }}</p>
+      {% endif %}
+      {% if error %}
+      <p class="banner bad" role="alert">{{ error }}</p>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+    <footer>
+      <p>Personal self-hosted tool. Offer data comes from Marktguru. You are responsible for complying with each source’s terms.</p>
+      {% if scheduler_on %}
+      <p>Automatic scans follow the interval in settings.</p>
+      {% else %}
+      <p>The scheduler is off in this process.</p>
+      {% endif %}
+    </footer>
   </div>
   <script src="{{ request.url_for('static', path='app.js') }}"></script>
 </body>

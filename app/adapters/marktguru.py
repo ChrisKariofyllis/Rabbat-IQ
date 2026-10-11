@@ -12,12 +12,14 @@ import asyncio
 import json
 import logging
 import time
+from collections import Counter
 from pathlib import Path
-from urllib.parse import quote_plus
+from urllib.parse import urlparse
 
 import httpx
 
 from app.domain import Flyer, GeoPlace, Offer, StoreLocation
+from app.geo import haversine_m
 from app.formatting import parse_dt
 from app.textutil import same_chain
 
@@ -112,6 +114,43 @@ def _first(items):
     return {}
 
 
+def offer_link(raw: dict, *, site: str) -> str:
+    """Prefer a direct product URL, then the Marktguru offer page.
+
+    Generic search pages and category overviews are skipped. They 404 or land
+    on a catalogue that is not this product.
+    """
+
+    offer_id = str(raw.get("id") or "")
+    leaflet_id = raw.get("leafletFlightId")
+    external = str(raw.get("externalUrl") or "").strip()
+    if _specific_product_url(external):
+        return external
+    if offer_id:
+        return f"{site}/offers/{offer_id}"
+    if leaflet_id:
+        return f"{site}/leaflets/{leaflet_id}/page/0"
+    return ""
+
+
+def _specific_product_url(url: str) -> bool:
+    if not url.lower().startswith("http"):
+        return False
+    lowered = url.lower()
+    if any(token in lowered for token in ("doubleclick.", "flashtalking.", "trackclk", "googlesyndication.")):
+        return False
+    parsed = urlparse(url)
+    path = parsed.path.lower().rstrip("/")
+    query = parsed.query.lower()
+    if path.endswith("/suche") or path.endswith("/search"):
+        return False
+    generic_overview = "uebersicht" in path or path.endswith("/overview") or "kloffer-category" in query
+    specific_id = any(key in query for key in ("articleid", "productid", "offerid", "sku"))
+    if generic_overview and not specific_id:
+        return False
+    return True
+
+
 def parse_offer(raw: dict, *, cdn: str, site: str) -> Offer:
     product = raw.get("product") or {}
     brand = raw.get("brand") or {}
@@ -121,8 +160,7 @@ def parse_offer(raw: dict, *, cdn: str, site: str) -> Offer:
     offer_id = str(raw.get("id") or "")
     chain = str(advertiser.get("name") or "")
     product_name = str(product.get("name") or raw.get("description") or "Offer")
-    external = str(raw.get("externalUrl") or "")
-    link = external or f"{site}/suche?q={quote_plus(product_name)}"
+    link = offer_link(raw, site=site)
     leaflet_id = raw.get("leafletFlightId")
     return Offer(
         external_id=offer_id,
@@ -165,6 +203,19 @@ def parse_store(raw: dict) -> StoreLocation:
     )
 
 
+def flyer_scope(raw: dict) -> str:
+    """Local means one booklet. Broader means a campaign shared across many."""
+
+    spread = bool(raw.get("spreadLeaflet"))
+    try:
+        leaflet_count = int(raw.get("leafletCount") or 0)
+    except (TypeError, ValueError):
+        leaflet_count = 0
+    if spread or leaflet_count > 1:
+        return "broader"
+    return "local"
+
+
 def parse_flight(raw: dict, *, cdn: str, site: str) -> Flyer:
     advertiser = raw.get("advertiser") or {}
     industry = raw.get("industry") or {}
@@ -191,6 +242,7 @@ def parse_flight(raw: dict, *, cdn: str, site: str) -> Flyer:
         page_urls=page_urls,
         source_url=f"{site}/leaflets/{leaflet_id}/page/0" if leaflet_id else site,
         source="marktguru",
+        scope=flyer_scope(raw),
     )
 
 
@@ -208,6 +260,118 @@ def parse_place(raw: dict, postal_code: str, country: str) -> GeoPlace | None:
         longitude=longitude,
         country=country,
     )
+
+
+def place_from_locations(results: list, postal_code: str, country: str) -> GeoPlace | None:
+    """Center a postal code on every locality that shares it.
+
+    Marktguru returns hamlets first. Using only the first point puts the
+    radius on a village edge, so nearby branches look farther than they are.
+    """
+
+    matches: list[GeoPlace] = []
+    fallback: GeoPlace | None = None
+    for item in results:
+        if not isinstance(item, dict):
+            continue
+        place = parse_place(item, postal_code, country)
+        if place is None:
+            continue
+        zips = [str(code) for code in item.get("zipCodes") or []]
+        if postal_code and postal_code in zips:
+            matches.append(place)
+        elif fallback is None:
+            fallback = place
+    if not matches:
+        return fallback
+    if len(matches) == 1:
+        return matches[0]
+    name = _shared_place_name(matches, postal_code)
+    exact = [item for item in matches if item.name.casefold() == name.casefold()]
+    # The town that shares the postal code's name is the center people shop
+    # from. Averaging every hamlet pulls that center into the fields.
+    chosen = exact or matches
+    latitude = sum(item.latitude for item in chosen) / len(chosen)
+    longitude = sum(item.longitude for item in chosen) / len(chosen)
+    return GeoPlace(
+        postal_code=postal_code,
+        name=name,
+        latitude=latitude,
+        longitude=longitude,
+        country=country,
+    )
+
+
+def _shared_place_name(places: list[GeoPlace], postal_code: str) -> str:
+    tokens = [place.name.split()[0] for place in places if place.name.split()]
+    if tokens:
+        winner, count = Counter(tokens).most_common(1)[0]
+        if count >= max(2, (len(places) + 1) // 2):
+            return winner
+    latitude = sum(place.latitude for place in places) / len(places)
+    longitude = sum(place.longitude for place in places) / len(places)
+    nearest = min(
+        places,
+        key=lambda place: (place.latitude - latitude) ** 2 + (place.longitude - longitude) ** 2,
+    )
+    return nearest.name or postal_code
+
+
+def merge_store_lists(primary: list[StoreLocation], extra: list[StoreLocation]) -> list[StoreLocation]:
+    """Keep Marktguru branches, and add OpenStreetMap ones that are not the same shop."""
+
+    merged = list(primary)
+    for store in extra:
+        if any(_same_branch(store, existing) for existing in merged):
+            continue
+        merged.append(store)
+    return merged
+
+
+def _same_branch(left: StoreLocation, right: StoreLocation) -> bool:
+    related = (
+        same_chain(left.chain, right.chain)
+        or same_chain(left.name, right.chain)
+        or same_chain(left.chain, right.name)
+        or same_chain(left.name, right.name)
+    )
+    if not related:
+        return False
+    if None in (left.latitude, left.longitude, right.latitude, right.longitude):
+        return same_chain(left.name, right.name)
+    return haversine_m(left.latitude, left.longitude, right.latitude, right.longitude) <= 400
+
+
+def apply_radius(store: StoreLocation, place: GeoPlace, radius_m: float) -> bool:
+    """Measure the branch from the postal-code center and keep it inside the radius."""
+
+    if store.latitude is not None and store.longitude is not None:
+        store.distance_m = haversine_m(place.latitude, place.longitude, store.latitude, store.longitude)
+        return store.distance_m <= radius_m
+    if store.distance_m is None:
+        return False
+    return store.distance_m <= radius_m
+
+
+def leaflets_by_chain(flyers: list[Flyer], per_chain: int = 4, chain_limit: int = 16) -> list[Flyer]:
+    """Several leaflets per chain, largest first.
+
+    The booklet with the most offers is often a regional campaign whose nearest
+    branch sits outside a small radius. A smaller leaflet for the same chain
+    can list the local branch.
+    """
+
+    grouped: dict[str, list[Flyer]] = {}
+    for flyer in flyers:
+        if not flyer.external_id:
+            continue
+        grouped.setdefault(flyer.chain or flyer.external_id, []).append(flyer)
+    ranked = sorted(grouped.values(), key=lambda group: max(item.offer_count for item in group), reverse=True)
+    chosen: list[Flyer] = []
+    for group in ranked[:chain_limit]:
+        ordered = sorted(group, key=lambda item: item.offer_count, reverse=True)
+        chosen.extend(ordered[:per_chain])
+    return chosen
 
 
 def _number(value) -> float | None:
@@ -261,19 +425,8 @@ class MarktguruAdapter:
         return False
 
     async def geocode(self, postal_code: str, country: str) -> GeoPlace | None:
-        data = await self._get("locations", {"q": postal_code, "limit": 5})
-        results = data.get("results") or []
-        for item in results:
-            zips = [str(code) for code in item.get("zipCodes") or []]
-            if postal_code in zips:
-                place = parse_place(item, postal_code, country or self.country)
-                if place is not None:
-                    return place
-        for item in results:
-            place = parse_place(item, postal_code, country or self.country)
-            if place is not None:
-                return place
-        return None
+        data = await self._get("locations", {"q": postal_code, "limit": 50})
+        return place_from_locations(data.get("results") or [], postal_code, country or self.country)
 
     async def leaflets(self, place: GeoPlace, industries: set[str] | None, preferred: list[str]) -> list[Flyer]:
         data = await self._get(
@@ -304,15 +457,8 @@ class MarktguruAdapter:
         return deduped[:30]
 
     async def nearby_stores(self, place: GeoPlace, flyers: list[Flyer], radius_m: float) -> list[StoreLocation]:
-        by_chain: dict[str, Flyer] = {}
-        for flyer in flyers:
-            current = by_chain.get(flyer.chain)
-            if current is None or flyer.offer_count > current.offer_count:
-                by_chain[flyer.chain] = flyer
         found: list[StoreLocation] = []
-        for flyer in list(by_chain.values())[:12]:
-            if not flyer.external_id:
-                continue
+        for flyer in leaflets_by_chain(flyers):
             try:
                 data = await self._get(
                     f"leaflets/{flyer.external_id}/stores",
@@ -328,9 +474,23 @@ class MarktguruAdapter:
                 continue
             for item in data.get("results") or []:
                 store = parse_store(item)
-                if store.distance_m is None or store.distance_m <= radius_m:
+                if apply_radius(store, place, radius_m):
                     found.append(store)
-        return found
+        try:
+            from app.geo import osm_supermarkets
+
+            extra = await osm_supermarkets(
+                place.latitude,
+                place.longitude,
+                radius_m,
+                client=self._client,
+                place_name=place.name,
+                country=place.country,
+            )
+        except Exception:
+            log.warning("OpenStreetMap store lookup failed", exc_info=True)
+            extra = []
+        return merge_store_lists(found, extra)
 
     async def search_offers(self, place: GeoPlace, query: str, limit: int = 24) -> list[Offer]:
         data = await self._get(

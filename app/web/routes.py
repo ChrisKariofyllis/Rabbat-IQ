@@ -15,7 +15,19 @@ from app.services import repository
 from app.services.scan import is_scanning, scan_status, try_start_scan
 from app.textutil import extract_json
 from app.web.forms import CATEGORY_OPTIONS, COUNTRIES, PROVIDERS, parse_settings_form, settings_form_values
-from app.web.present import NAV, flyer_view, match_view, notice_text, offer_view, scan_view, store_views
+from app.textutil import same_chain
+from app.web.present import (
+    NAV,
+    flyer_view,
+    interest_offers,
+    match_view,
+    matched_interest,
+    notice_text,
+    offer_view,
+    scan_view,
+    store_chain_options,
+    store_views,
+)
 
 WEB_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(WEB_DIR / "templates"))
@@ -110,15 +122,38 @@ def overview(request: Request):
 
 
 @router.get("/stores")
-def stores_page(request: Request):
+def stores_page(request: Request, store: str = ""):
     settings = repository.get_settings()
     rows = repository.list_stores()
+    chains = store_chain_options(rows)
+    selected = store.strip()
+    if selected and not any(same_chain(selected, chain) for chain in chains):
+        selected = ""
+    visible = rows
+    if selected:
+        visible = [row for row in rows if same_chain(row.chain, selected) or same_chain(row.name, selected)]
     home = (settings.latitude, settings.longitude)
-    points, home_point = store_views(rows, home)
+    points, home_point = store_views(visible, home)
+    interests = [row.text for row in repository.list_interests()]
+    deals = []
+    for offer, label in interest_offers(repository.list_offers(), rows, interests, selected):
+        view = offer_view(offer)
+        view["interest"] = label
+        deals.append(view)
     return templates.TemplateResponse(
         request,
         "stores.html",
-        page_context(request, "stores", stores=points, home=home_point, has_map=home_point is not None or any(p["x"] is not None for p in points)),
+        page_context(
+            request,
+            "stores",
+            stores=points,
+            home=home_point,
+            has_map=home_point is not None or any(point["x"] is not None for point in points),
+            chains=chains,
+            selected_store=selected,
+            store_offers=deals,
+            has_interests=bool(interests),
+        ),
     )
 
 
@@ -146,17 +181,31 @@ def flyer_page(request: Request, flyer_id: int):
 
 
 @router.get("/offers")
-async def offers_page(request: Request, q: str = ""):
+async def offers_page(request: Request, q: str = "", interests: str = ""):
     query = " ".join(q.split())[:80]
-    saved = [offer_view(row) for row in repository.list_offers()]
-    live: list[dict] = []
+    interest_only = interests in {"1", "on", "true", "yes"}
+    interest_texts = [row.text for row in repository.list_interests()]
+    saved_rows = repository.list_offers()
+    live_rows: list = []
     error = ""
     if query:
-        live, error = await _live_search(query)
+        live_rows, error = await _live_search(query)
+    if interest_only:
+        saved_rows = [row for row in saved_rows if matched_interest(row, interest_texts)]
+        live_rows = [row for row in live_rows if matched_interest(row, interest_texts)]
     return templates.TemplateResponse(
         request,
         "offers.html",
-        page_context(request, "offers", saved=saved, live=live, query=query, search_error=error),
+        page_context(
+            request,
+            "offers",
+            saved=[_with_interest(row, interest_texts) for row in saved_rows],
+            live=[_with_interest(row, interest_texts) for row in live_rows],
+            query=query,
+            search_error=error,
+            interest_only=interest_only,
+            interest_texts=interest_texts,
+        ),
     )
 
 
@@ -333,7 +382,15 @@ def _sources():
     return catalog()
 
 
-async def _live_search(query: str) -> tuple[list[dict], str]:
+def _with_interest(offer, interests: list[str]) -> dict:
+    view = offer_view(offer)
+    label = matched_interest(offer, interests)
+    if label:
+        view["interest"] = label
+    return view
+
+
+async def _live_search(query: str) -> tuple[list, str]:
     from app.adapters.marktguru import AdapterError
     from app.adapters.registry import build_marktguru
 
@@ -349,7 +406,7 @@ async def _live_search(query: str) -> tuple[list[dict], str]:
             offers = await adapter.search_offers(place, query, limit=24)
     except AdapterError as exc:
         return [], str(exc)
-    return [offer_view(offer) for offer in offers], ""
+    return offers, ""
 
 
 def _iso(value) -> str | None:

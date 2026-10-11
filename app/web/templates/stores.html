@@ -2,6 +2,19 @@
 {% block title %}Stores · Rabbat-IQ{% endblock %}
 {% block heading %}Stores inside the radius{% endblock %}
 {% block content %}
+{% if chains %}
+<form class="filter-bar" method="get" action="/stores">
+  <label for="store">Offers at
+    <select id="store" name="store">
+      <option value="">All stores</option>
+      {% for chain in chains %}
+      <option value="{{ chain }}" {% if selected_store == chain %}selected{% endif %}>{{ chain }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button type="submit">Show</button>
+</form>
+{% endif %}
 {% if stores %}
 {% if has_map %}
 <section class="map-layout">
@@ -19,7 +32,7 @@
       {% endif %}
       {% endfor %}
     </svg>
-    <p class="hint">Positions are relative to each other, not a street map. The blue dot is your postal code.</p>
+    <p class="hint">Positions are relative to each other, not a street map. The filled pin is your postal code.</p>
   </div>
   <ul class="store-list">
     {% for store in stores %}
@@ -46,10 +59,24 @@
   {% endfor %}
 </ul>
 {% endif %}
+<section>
+  <h2>Offers for your interests{% if selected_store %} at {{ selected_store }}{% endif %}</h2>
+  {% if store_offers %}
+  <div class="cards">
+    {% for deal in store_offers %}
+    {% include "deal.html" %}
+    {% endfor %}
+  </div>
+  {% elif not has_interests %}
+  <div class="empty"><p>Add an interest, then scan. This list shows offers from these stores that match what you buy.</p></div>
+  {% else %}
+  <div class="empty"><p>No saved offers match your interests{% if selected_store %} at {{ selected_store }}{% endif %}. A new scan fills this in.</p></div>
+  {% endif %}
+</section>
 {% else %}
 <div class="empty">
   <h2>No stores saved</h2>
-  <p>A scan looks up leaflets for your postal code, then keeps branches whose distance is inside the radius. Run a scan after settings and interests are in place.</p>
+  <p>A scan centers your postal code on the localities Marktguru lists for it, then keeps branches from those leaflets that sit inside the radius. A chain is left out when its nearest listed branch is farther away. Run a scan after settings and interests are in place.</p>
   <a class="button" href="/settings">Edit location</a>
 </div>
 {% endif %}

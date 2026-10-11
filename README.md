@@ -7,12 +7,36 @@ It is aimed at Germany and Austria. The first data source is [Marktguru](https:/
 ## What a scan does
 
 1. Turns your postal code into a place (Marktguru’s location search, then OpenStreetMap Nominatim if that fails).
-2. Loads current leaflets and keeps supermarkets, discounters, drugstores, and hardware stores inside your radius.
+2. Loads current leaflets for that postal code and keeps supermarket, discounter, drugstore, and hardware branches inside your radius.
 3. Searches offers for each interest.
 4. Matches them locally by keyword, or with your own vision/chat model if you turn that on.
 5. Saves new matches and, when Telegram is configured, sends each one once.
 
 The same offer, interest, price, and end date are not sent again.
+
+## How nearby stores are found
+
+Marktguru’s location search returns every hamlet that shares a postal code. The first hit is often on the edge, and the average of all of them can sit in the fields between villages. When one locality is named for the postal area itself (Sinzing for 93161, not Sinzing Adlstein), that point is the center. Otherwise the localities are averaged. Nominatim is used only when Marktguru returns no coordinates.
+
+Branches come from two places, both measured from that center and kept only inside your radius:
+
+1. Marktguru’s store list on the current leaflets, up to four leaflets per chain, so a smaller local booklet is not hidden by the chain’s biggest campaign.
+2. OpenStreetMap supermarkets around that center, for branches a leaflet does not list. In Sinzing that is the Edeka on Am Reitfeld. If the map service is unavailable, the same chains are looked up by name in the town. A shop already returned by Marktguru is not added twice.
+
+The map is a relative plot of those saved branches, not a street map.
+
+## Flyer scope
+
+Flyers are the leaflets Marktguru returns for your postal code. They are not a dump of every German leaflet. Each one is labeled:
+
+- **Local** — one booklet (`spreadLeaflet` is false and `leafletCount` is 1). This is the tighter match for your area.
+- **Broader** — a spread campaign, or a flight that stacks more than one leaflet. The offers still reach your postal code, and the same booklet is shared across many stores.
+
+Local booklets are listed first. Broader ones stay on the page because weekly chain offers often live in those shared campaigns.
+
+## Offer links
+
+Open offer uses a direct product URL when the source has one, such as a Lidl product page or a Kaufland link that names an article id. Category overviews, ad trackers, and Marktguru search URLs are not used. When no specific product URL exists, the link is the Marktguru offer page at `/offers/{id}`.
 
 ## Run with Docker
 

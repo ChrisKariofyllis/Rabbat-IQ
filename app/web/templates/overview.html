@@ -17,7 +17,7 @@
   </div>
 </section>
 
-<section class="stats" aria-label="Counts">
+<section class="ledger" aria-label="Counts">
   <a href="/stores"><span>Stores in range</span><strong>{{ stats.stores }}</strong></a>
   <a href="/flyers"><span>Current flyers</span><strong>{{ stats.flyers }}</strong></a>
   <a href="/offers"><span>Offers saved</span><strong>{{ stats.offers }}</strong></a>
@@ -68,12 +68,13 @@
     {% for flyer in flyers %}
     <a class="flyer" href="/flyers/{{ flyer.id }}">
       {% if flyer.cover_url %}
-      <img src="{{ flyer.cover_url }}" alt="{{ flyer.chain }} flyer cover">
+      <img src="{{ flyer.cover_url }}" alt="{{ flyer.chain }} flyer cover" loading="lazy" decoding="async">
       {% else %}
       <div class="flyer-fallback">{{ flyer.chain }}</div>
       {% endif %}
       <div class="flyer-meta">
         <strong>{{ flyer.chain }}</strong>
+        <span class="scope scope-{{ flyer.scope or 'postal' }}">{{ flyer.scope_label }}</span>
         <span>{{ flyer.when }}</span>
       </div>
     </a>

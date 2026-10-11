@@ -42,6 +42,7 @@ class Flyer:
     page_urls: list[str] = field(default_factory=list)
     source_url: str = ""
     source: str = "marktguru"
+    scope: str = "local"
 
 
 @dataclass
