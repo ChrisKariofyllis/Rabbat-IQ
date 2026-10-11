@@ -7,6 +7,7 @@ from app.adapters.marktguru import (
     leaflets_by_chain,
     parse_homepage_keys,
     parse_flight,
+    offer_link,
     parse_offer,
     place_from_locations,
     selected_industries,
@@ -37,6 +38,24 @@ def test_parse_offer_uses_public_image_and_price():
     assert parsed.image_url.endswith("/offers/25289747/images/default/0/medium.jpg")
     assert parsed.link_url == "https://filiale.example/offer"
     assert parsed.valid_to is not None
+
+
+def test_offer_link_skips_generic_pages():
+    site = "https://www.marktguru.de"
+    assert offer_link({"id": 11, "externalUrl": None}, site=site) == "https://www.marktguru.de/offers/11"
+    assert (
+        offer_link({"id": 11, "externalUrl": "https://www.lidl.de/p/energy/p100410253"}, site=site)
+        == "https://www.lidl.de/p/energy/p100410253"
+    )
+    article = "https://filiale.kaufland.de/angebote/uebersicht.html?kloffer-articleID=20897900"
+    assert offer_link({"id": 11, "externalUrl": article}, site=site) == article
+    category = "https://filiale.kaufland.de/angebote/uebersicht.html?kloffer-category=0001_TopArticle"
+    assert offer_link({"id": 11, "externalUrl": category}, site=site) == "https://www.marktguru.de/offers/11"
+    search = "https://www.marktguru.de/suche?q=Energy+Drink"
+    assert offer_link({"id": 11, "externalUrl": search}, site=site) == "https://www.marktguru.de/offers/11"
+    tracker = "https://ad.doubleclick.net/ddm/trackclk/N1.site/B2"
+    assert offer_link({"id": 11, "externalUrl": tracker}, site=site) == "https://www.marktguru.de/offers/11"
+    assert "suche?q=" not in offer_link({"id": 11, "product": {"name": "Energy Drink"}}, site=site)
 
 
 def test_homepage_keys_and_industry_filter():
