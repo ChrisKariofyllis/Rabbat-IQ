@@ -16,11 +16,14 @@ The same offer, interest, price, and end date are not sent again.
 
 ## How nearby stores are found
 
-Marktguru’s location search returns every locality that shares a postal code, and the first hit is often a hamlet on the edge. Rabbat-IQ averages those points into one postal-code center (for 93161 that is the Sinzing area, not the first village alone). Nominatim is used only when Marktguru returns no coordinates.
+Marktguru’s location search returns every hamlet that shares a postal code. The first hit is often on the edge, and the average of all of them can sit in the fields between villages. When one locality is named for the postal area itself (Sinzing for 93161, not Sinzing Adlstein), that point is the center. Otherwise the localities are averaged. Nominatim is used only when Marktguru returns no coordinates.
 
-Leaflets are loaded for that postal code. Branches come from Marktguru’s store list on each leaflet, up to four leaflets per chain and not only the booklet with the most offers. A national or regional booklet can list a branch in the next town, while a smaller booklet for the same chain lists the local one. Each branch is measured from the postal-code center. It is kept when that distance is inside the radius you set, then duplicates are dropped in favor of the nearest.
+Branches come from two places, both measured from that center and kept only inside your radius:
 
-A chain can still be absent. If its closest branch in Marktguru’s lists is farther than the radius, it is left off the Stores page. Raising the radius in Settings is the way to include it. The map is a relative plot of those saved branches, not a street map.
+1. Marktguru’s store list on the current leaflets, up to four leaflets per chain, so a smaller local booklet is not hidden by the chain’s biggest campaign.
+2. OpenStreetMap supermarkets around that center, for branches a leaflet does not list. In Sinzing that is the Edeka on Am Reitfeld. If the map service is unavailable, the same chains are looked up by name in the town. A shop already returned by Marktguru is not added twice.
+
+The map is a relative plot of those saved branches, not a street map.
 
 ## Flyer scope
 
