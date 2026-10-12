@@ -1,6 +1,6 @@
 [project]
 name = "rabbat-iq"
-version = "1.1.0"
+version = "1.2.0"
 description = "Self-hosted supermarket deal hunter for Germany and Austria"
 requires-python = ">=3.11"
 

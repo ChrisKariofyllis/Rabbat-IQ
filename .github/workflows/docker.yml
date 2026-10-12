@@ -6,13 +6,16 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: read
+  packages: write
+  attestations: write
+  id-token: write
+
 jobs:
   build-and-push:
     name: Build and publish
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -21,7 +24,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
+          username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract image metadata
@@ -30,7 +33,8 @@ jobs:
         with:
           images: ghcr.io/chriskariofyllis/rabbat-iq
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=latest
+            type=raw,value=beta,enable=${{ github.ref_type == 'tag' && contains(github.ref_name, 'beta') }}
             type=sha
             type=ref,event=tag
 
@@ -41,3 +45,5 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          provenance: mode=max
+          sbom: true

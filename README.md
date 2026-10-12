@@ -20,7 +20,7 @@ Clone this repository (or copy `docker-compose.yml` into a folder) and run:
 docker compose up -d
 ```
 
-The first run pulls `ghcr.io/chriskariofyllis/rabbat-iq:latest`. To pin a release, use `ghcr.io/chriskariofyllis/rabbat-iq:v1.1.0-beta`.
+The first run pulls `ghcr.io/chriskariofyllis/rabbat-iq:latest`. To pin a release, use `ghcr.io/chriskariofyllis/rabbat-iq:v1.2.0-beta`.
 
 Open http://127.0.0.1:8000. Compose binds port 8000 on localhost. The SQLite database lives in the `rabbat-iq-data` volume.
 
