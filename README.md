@@ -206,5 +206,6 @@ app/
   ai/                     keyword matcher and model clients
   notifications/          Telegram alerts
   bot/                    /status, /add, /scan_now, and the rest
+  services/               database and the scan pipeline
   web/                    pages, CSS, and the scan poller
 ```
