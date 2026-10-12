@@ -20,11 +20,76 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Restore Actions write on the GHCR package
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const headers = { "X-GitHub-Api-Version": "2022-11-28" };
+            const { data: repository } = await github.rest.repos.get({ owner, repo });
+            core.info(`repository id ${repository.id}`);
+            try {
+              const pkg = await github.request(
+                "GET /users/{username}/packages/{package_type}/{package_name}",
+                { username: owner, package_type: "container", package_name: "rabbat-iq", headers }
+              );
+              core.info(JSON.stringify({
+                name: pkg.data.name,
+                visibility: pkg.data.visibility,
+                repository: pkg.data.repository && pkg.data.repository.full_name,
+              }));
+            } catch (err) {
+              core.warning(`get package: ${err.status} ${err.message}`);
+            }
+            try {
+              await github.request(
+                "PUT /user/packages/{package_type}/{package_name}/selected_repositories/{repository_id}",
+                {
+                  package_type: "container",
+                  package_name: "rabbat-iq",
+                  repository_id: repository.id,
+                  headers,
+                }
+              );
+              core.info("granted selected_repositories write to this repo");
+            } catch (err) {
+              core.warning(`grant access: ${err.status} ${err.message}`);
+            }
+            try {
+              const versions = await github.request(
+                "GET /users/{username}/packages/{package_type}/{package_name}/versions",
+                {
+                  username: owner,
+                  package_type: "container",
+                  package_name: "rabbat-iq",
+                  per_page: 100,
+                  headers,
+                }
+              );
+              core.info(`existing versions: ${versions.data.length}`);
+              for (const version of versions.data) {
+                await github.request(
+                  "DELETE /users/{username}/packages/{package_type}/{package_name}/versions/{package_version_id}",
+                  {
+                    username: owner,
+                    package_type: "container",
+                    package_name: "rabbat-iq",
+                    package_version_id: version.id,
+                    headers,
+                  }
+                );
+                core.info(`deleted package version ${version.id} ${version.metadata && version.metadata.container && version.metadata.container.tags}`);
+              }
+            } catch (err) {
+              core.warning(`reset versions: ${err.status} ${err.message}`);
+            }
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.repository_owner }}
+          username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract image metadata
