@@ -1,12 +1,46 @@
 # Rabbat-IQ
 
-Rabbat-IQ is a self-hosted tool that watches supermarket offers near a postal code and tells you when something matches what you actually buy.
+[![CI](https://github.com/ChrisKariofyllis/Rabbat-IQ/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ChrisKariofyllis/Rabbat-IQ/actions/workflows/ci.yml)
+[![GHCR](https://img.shields.io/badge/ghcr.io-chriskariofyllis%2Frabbat--iq-blue)](https://github.com/ChrisKariofyllis/Rabbat-IQ/pkgs/container/rabbat-iq)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ![Rabbat-IQ overview after a scan of München, 80333, 1 km](docs/overview.png)
 
-Interests, flyer images, and API keys stay on your machine. The model and the Telegram bot are optional, and both use credentials you provide.
+Self-hosted tool that finds supermarket deals near you. Scan flyers from nearby stores, match them to your interests with AI, and get Telegram alerts.
+
+Rabbat-IQ is currently in beta. It is privacy-focused and self-hosted: interests, flyer images, matches, and API keys stay on the machine in a local SQLite database. You bring your own AI and Telegram credentials if you want those features. Keyword matching works with no key.
 
 It is aimed at Germany and Austria. The first data source is [Marktguru](https://www.marktguru.de/). Direct chain scrapers can be added beside it.
+
+## Quick Start
+
+Clone this repository (or copy `docker-compose.yml` into a folder) and run:
+
+```bash
+docker compose up -d
+```
+
+The first run pulls `ghcr.io/chriskariofyllis/rabbat-iq:latest`. The first beta is also published as `ghcr.io/chriskariofyllis/rabbat-iq:v1.0.0-beta` if you want to pin that tag instead of `latest`.
+
+Open http://127.0.0.1:8000. Compose binds port 8000 on localhost. The SQLite database lives in the `rabbat-iq-data` volume.
+
+Then:
+
+1. Set a postal code, country, and radius under Settings.
+2. Add interests such as `Greek yogurt`, `beer`, or `Werkzeugkasten`.
+3. Choose Scan now.
+
+The scheduler (APScheduler, inside the app) repeats the scan on the interval you set in Settings (15–180 minutes, default 30). The first automatic run happens within about a minute after a postal code and at least one interest are saved.
+
+If the published image cannot be pulled yet, uncomment `build: .` in `docker-compose.yml` and run `docker compose up -d --build`.
+
+## Update
+
+```bash
+docker compose pull && docker compose up -d
+```
+
+That fetches a newer `latest` (or whichever tag you pinned) and restarts the container. The data volume is left in place.
 
 ## What a scan does
 
@@ -42,27 +76,25 @@ Local booklets are listed first. Broader ones stay on the page because weekly ch
 
 Open offer uses a direct product URL when the source has one, such as a Lidl product page or a Kaufland link that names an article id. Category overviews, ad trackers, and Marktguru search URLs are not used. When no specific product URL exists, the link is the Marktguru offer page at `/offers/{id}`.
 
-## Run with Docker
+## Build from source
+
+### Docker
+
+Uncomment `build: .` in `docker-compose.yml` (and optionally comment out the `image:` line), then:
 
 ```bash
-docker compose up --build
+git clone https://github.com/ChrisKariofyllis/Rabbat-IQ.git
+cd Rabbat-IQ
+docker compose up -d --build
 ```
 
-Open http://127.0.0.1:8787. The compose file binds that port to localhost. The SQLite database lives in the `rabbat-iq-data` volume.
-
-Then:
-
-1. Set a postal code, country, and radius under Settings.
-2. Add interests such as `Greek yogurt`, `beer`, or `Werkzeugkasten`.
-3. Choose Scan now.
-
-The scheduler repeats the scan on the interval you set (15–180 minutes, default 30). The first automatic run happens within about a minute after a postal code and at least one interest are saved.
-
-## Run without Docker
+### Python
 
 Python 3.11 or newer:
 
 ```bash
+git clone https://github.com/ChrisKariofyllis/Rabbat-IQ.git
+cd Rabbat-IQ
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements-dev.txt
@@ -71,7 +103,7 @@ uvicorn app.main:app --host 127.0.0.1 --port 8642
 
 Open http://127.0.0.1:8642.
 
-Copy `.env.example` to `.env` if you want a different database path, HTTP basic auth, or your own Marktguru keys. Shopping settings are edited in the web UI and stored in SQLite, not in the env file.
+Copy `.env.example` to `.env` if you want a different database path, HTTP basic auth, or your own Marktguru keys. Shopping settings (postal code, Telegram, AI provider, scan interval) are edited in the web UI and stored in SQLite, not in the env file.
 
 ## Telegram
 
@@ -120,15 +152,19 @@ The model is asked to return:
 
 ## Configuration
 
-Environment variables use the `RABBAT_IQ_` prefix. See `.env.example`.
+Environment variables use the `RABBAT_IQ_` prefix. See `.env.example`. Postal code, country, radius, scan interval, Telegram, and AI settings are stored in the database and edited in the web UI.
 
 | Variable | Purpose |
 | --- | --- |
-| `RABBAT_IQ_DATABASE_URL` | SQLite URL. Default `sqlite:///./data/rabbat-iq.db` |
-| `RABBAT_IQ_DATA_DIR` | Key cache and other local files |
-| `RABBAT_IQ_BASIC_AUTH_USER` / `PASSWORD` | Optional password for the web UI |
-| `RABBAT_IQ_MARKTGURU_API_KEY` / `CLIENT_KEY` | Optional. Otherwise keys are read from the public homepage and cached for 12 hours |
-| `RABBAT_IQ_POSTAL_CODE` / `COUNTRY` | Used only when the database is first created |
+| `RABBAT_IQ_DATABASE_URL` | SQLite URL. Default `sqlite:///./data/rabbat-iq.db`. Compose uses `sqlite:////data/rabbat-iq.db` |
+| `RABBAT_IQ_DATA_DIR` | Key cache and other local files. Default `./data` (Compose: `/data`) |
+| `RABBAT_IQ_HOST` | Bind address. Default `0.0.0.0` |
+| `RABBAT_IQ_PORT` | Bind port. Default `8000` |
+| `RABBAT_IQ_LOG_LEVEL` | Log level. Default `INFO` |
+| `RABBAT_IQ_BASIC_AUTH_USER` / `RABBAT_IQ_BASIC_AUTH_PASSWORD` | Optional password for the web UI |
+| `RABBAT_IQ_MARKTGURU_API_KEY` / `RABBAT_IQ_MARKTGURU_CLIENT_KEY` | Optional. Otherwise keys are read from the public homepage and cached for 12 hours |
+| `RABBAT_IQ_POSTAL_CODE` / `RABBAT_IQ_COUNTRY` | Used only when the database is first created |
+| `RABBAT_IQ_DISABLE_SCHEDULER` / `RABBAT_IQ_DISABLE_BOT` | For tests and local debugging. Leave unset in normal use |
 
 If you publish the port beyond localhost, set the basic-auth variables.
 
@@ -170,6 +206,5 @@ app/
   ai/                     keyword matcher and model clients
   notifications/          Telegram alerts
   bot/                    /status, /add, /scan_now, and the rest
-  services/               database and the scan pipeline
   web/                    pages, CSS, and the scan poller
 ```

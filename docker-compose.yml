@@ -1,10 +1,12 @@
 services:
   rabbat-iq:
-    build: .
+    image: ghcr.io/chriskariofyllis/rabbat-iq:latest
+    # Build from this checkout instead of pulling the published image:
+    # build: .
     ports:
       # Bound to localhost. Drop the 127.0.0.1 prefix only if you mean to
       # expose the UI, and set RABBAT_IQ_BASIC_AUTH_USER/PASSWORD when you do.
-      - "127.0.0.1:8787:8000"
+      - "127.0.0.1:8000:8000"
     environment:
       RABBAT_IQ_DATABASE_URL: sqlite:////data/rabbat-iq.db
       RABBAT_IQ_DATA_DIR: /data
