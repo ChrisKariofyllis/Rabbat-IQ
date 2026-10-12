@@ -60,16 +60,34 @@ async def _http_error(request, exc: StarletteHTTPException):
     return PlainTextResponse(str(exc.detail), status_code=exc.status_code)
 
 
+def _content_security_policy(host: str) -> str:
+    # Live design mode loads from localhost:8400. Only a loopback request gets that allowance.
+    # Leaflet positions tiles and pins with style attributes, so style-src-attr allows that
+    # without opening stylesheet injection. Street tiles come from OpenStreetMap France.
+    live = ""
+    if host.lower() in {"localhost", "127.0.0.1"}:
+        live = " http://localhost:8400"
+    connect = f"; connect-src 'self'{live}" if live else ""
+    tiles = (
+        "https://a.tile.openstreetmap.fr https://b.tile.openstreetmap.fr "
+        "https://c.tile.openstreetmap.fr"
+    )
+    return (
+        "default-src 'self'; "
+        f"img-src 'self' https://cdn.marktguru.de https://cdn.marktguru.at {tiles} data:; "
+        "style-src 'self'; style-src-attr 'unsafe-inline'; "
+        f"script-src 'self'{live}{connect}; form-action 'self'; "
+        "base-uri 'self'; frame-ancestors 'none'"
+    )
+
+
 async def security_headers(request, call_next):
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "same-origin"
-    response.headers["Content-Security-Policy"] = (
-        "default-src 'self'; "
-        "img-src 'self' https://cdn.marktguru.de https://cdn.marktguru.at data:; "
-        "style-src 'self'; script-src 'self'; form-action 'self'; "
-        "base-uri 'self'; frame-ancestors 'none'"
+    response.headers["Content-Security-Policy"] = _content_security_policy(
+        request.url.hostname or ""
     )
     return response
 

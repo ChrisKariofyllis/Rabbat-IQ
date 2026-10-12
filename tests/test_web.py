@@ -132,9 +132,17 @@ def test_store_page_filters_interest_offers(tmp_path):
         assert "Netto Sinzing" in page.text
         assert "Joghurt" in page.text
         assert "Energy Drink" not in page.text
+        assert 'id="store-map"' in page.text
+        assert "var(--chain-netto)" in page.text
+        assert "var(--chain-norma)" in page.text
+        policy = page.headers["content-security-policy"]
+        assert "tile.openstreetmap.fr" in policy
+        assert "tile.openstreetmap.org" not in policy
+        assert "basemaps.cartocdn.com" not in policy
         filtered = client.get("/stores", params={"store": "Netto"})
         assert "Netto Sinzing" in filtered.text
         assert "NORMA Sinzing" not in filtered.text
+        assert "var(--chain-norma)" not in filtered.text
         assert "Joghurt" in filtered.text
 
 
@@ -155,6 +163,55 @@ def test_offers_page_can_keep_only_interest_matches(tmp_path):
         assert "Joghurt" in filtered.text
         assert "Energy Drink" not in filtered.text
         assert "checked" in filtered.text
+
+
+def test_store_map_centers_on_the_postal_code(tmp_path):
+    with make_client(tmp_path) as client:
+        repository.update_settings(
+            postal_code="80331",
+            country="de",
+            radius_km=2,
+            latitude=48.137,
+            longitude=11.575,
+        )
+        repository.replace_stores(
+            [
+                StoreLocation(
+                    "1",
+                    "EDEKA Stadt",
+                    "EDEKA",
+                    "Marienplatz 1",
+                    "80331",
+                    "München",
+                    48.138,
+                    11.576,
+                    120,
+                    "Mo-Sa 08:00-20:00",
+                    "marktguru",
+                ),
+                StoreLocation(
+                    "2",
+                    "Lidl Tal",
+                    "Lidl",
+                    "Tal 10",
+                    "80331",
+                    "München",
+                    48.135,
+                    11.581,
+                    480,
+                    "",
+                    "marktguru",
+                ),
+            ]
+        )
+        page = client.get("/stores")
+        assert page.status_code == 200
+        assert '"lat": 48.137' in page.text
+        assert '"radiusM": 2000.0' in page.text
+        assert "var(--chain-edeka)" in page.text
+        assert "var(--chain-lidl)" in page.text
+        assert "Mo-Sa 08:00-20:00" in page.text
+        assert "leaflet.js" in page.text
 
 
 def test_basic_auth_protects_pages_but_not_health(tmp_path):

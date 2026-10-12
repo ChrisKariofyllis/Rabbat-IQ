@@ -8,6 +8,7 @@
   <title>{% block title %}Rabbat-IQ{% endblock %}</title>
   <link rel="icon" href="{{ request.url_for('static', path='favicon.svg') }}" type="image/svg+xml">
   <link rel="stylesheet" href="{{ request.url_for('static', path='style.css') }}">
+  {% block head %}{% endblock %}
 </head>
 <body data-poll="{{ '1' if poll else '0' }}">
   <a class="skip" href="#content">Skip to content</a>
@@ -64,5 +65,6 @@
     </footer>
   </div>
   <script src="{{ request.url_for('static', path='app.js') }}"></script>
+  {% block scripts %}{% endblock %}
 </body>
 </html>

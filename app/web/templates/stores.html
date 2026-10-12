@@ -1,7 +1,27 @@
 {% extends "base.html" %}
 {% block title %}Stores · Rabbat-IQ{% endblock %}
 {% block heading %}Stores inside the radius{% endblock %}
+{% block head %}
+{% if stores and has_map %}
+<link rel="stylesheet" href="{{ request.url_for('static', path='vendor/leaflet/leaflet.css') }}">
+{% endif %}
+{% endblock %}
 {% block content %}
+{% macro store_list(stores) %}
+<ul class="store-list">
+  {% for store in stores %}
+  <li {% if store.lat is not none and store.lon is not none %}data-store-id="{{ store.id }}"{% endif %}>
+    <span class="chain-dot" data-tone="{{ store.tone }}" style="--pin: {{ store.color }}" aria-hidden="true"></span>
+    <div>
+      <strong>{{ store.name }}</strong>
+      <p>{{ store.chain }}{% if store.address %} · {{ store.address }}{% endif %}{% if store.city %}, {{ store.postal_code }} {{ store.city }}{% endif %}</p>
+      {% if store.hours %}<p class="hint">{{ store.hours }}</p>{% endif %}
+    </div>
+    {% if store.distance %}<span class="distance">{{ store.distance }}</span>{% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% endmacro %}
 {% if chains %}
 <form class="filter-bar" method="get" action="/stores">
   <label for="store">Offers at
@@ -19,45 +39,17 @@
 {% if has_map %}
 <section class="map-layout">
   <div class="map-card">
-    <svg viewBox="0 0 100 100" role="img" aria-label="Relative map of nearby stores">
-      <rect x="1" y="1" width="98" height="98" class="map-frame"></rect>
-      {% if home %}
-      <circle class="home-pin" cx="{{ home.x }}" cy="{{ home.y }}" r="2.1"></circle>
-      <text class="home-label" x="{{ home.x + 2.6 }}" y="{{ home.y + 1 }}">You</text>
-      {% endif %}
-      {% for store in stores if store.x is not none %}
-      <circle cx="{{ store.x }}" cy="{{ store.y }}" r="1.7" fill="{{ store.color }}"></circle>
-      {% if store.show_label %}
-      <text x="{{ store.x + 2.4 }}" y="{{ store.y + 0.8 }}">{{ store.chain or store.name }}</text>
-      {% endif %}
-      {% endfor %}
-    </svg>
-    <p class="hint">Positions are relative to each other, not a street map. The filled pin is your postal code.</p>
+    <div id="store-map" class="store-map" role="region" aria-label="Map of stores inside the search radius">
+      <p class="map-fallback">Loading the street map…</p>
+    </div>
+    <p class="hint" id="map-note">{% if home %}The circle is your search radius, and You is the postal code.{% else %}Saved branch coordinates. Set a postal code and scan to place You and the radius.{% endif %}</p>
+    <noscript><p class="hint">JavaScript is off, so the street map stays blank. The list still has every saved branch.</p></noscript>
+    <script type="application/json" id="store-map-data">{{ map_data | tojson }}</script>
   </div>
-  <ul class="store-list">
-    {% for store in stores %}
-    <li>
-      <div>
-        <strong>{{ store.name }}</strong>
-        <p>{{ store.chain }}{% if store.address %} · {{ store.address }}{% endif %}{% if store.city %}, {{ store.postal_code }} {{ store.city }}{% endif %}</p>
-        {% if store.hours %}<p class="hint">{{ store.hours }}</p>{% endif %}
-      </div>
-      {% if store.distance %}<span class="distance">{{ store.distance }}</span>{% endif %}
-    </li>
-    {% endfor %}
-  </ul>
+  {{ store_list(stores) }}
 </section>
 {% else %}
-<ul class="store-list">
-  {% for store in stores %}
-  <li>
-    <div>
-      <strong>{{ store.name }}</strong>
-      <p>{{ store.address }}</p>
-    </div>
-  </li>
-  {% endfor %}
-</ul>
+{{ store_list(stores) }}
 {% endif %}
 <section>
   <h2>Offers for your interests{% if selected_store %} at {{ selected_store }}{% endif %}</h2>
@@ -79,5 +71,11 @@
   <p>A scan centers your postal code on the localities Marktguru lists for it, then keeps branches from those leaflets that sit inside the radius. A chain is left out when its nearest listed branch is farther away. Run a scan after settings and interests are in place.</p>
   <a class="button" href="/settings">Edit location</a>
 </div>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+{% if stores and has_map %}
+<script src="{{ request.url_for('static', path='vendor/leaflet/leaflet.js') }}"></script>
+<script src="{{ request.url_for('static', path='map.js') }}"></script>
 {% endif %}
 {% endblock %}

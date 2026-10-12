@@ -23,14 +23,10 @@ jobs:
           prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') || contains(github.ref_name, 'alpha') }}
           generate_release_notes: true
           body: |
-            This is the first beta of Rabbat-IQ.
-
-            Self-hosted Docker install. Clone the repository (or copy `docker-compose.yml`) and run:
+            Pull the image and restart:
 
             ```bash
-            docker compose up -d
+            docker compose pull && docker compose up -d
             ```
 
-            That pulls `ghcr.io/chriskariofyllis/rabbat-iq`. Your SQLite database, interests, and API keys stay on the machine in the `rabbat-iq-data` volume.
-
-            Open http://127.0.0.1:8000 and set postal code, Telegram, and AI keys in Settings. The scan interval is there too.
+            Pin this tag with `ghcr.io/chriskariofyllis/rabbat-iq:${{ github.ref_name }}`. Your SQLite database stays in the `rabbat-iq-data` volume. Open http://127.0.0.1:8000.

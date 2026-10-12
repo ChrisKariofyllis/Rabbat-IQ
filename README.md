@@ -20,7 +20,7 @@ Clone this repository (or copy `docker-compose.yml` into a folder) and run:
 docker compose up -d
 ```
 
-The first run pulls `ghcr.io/chriskariofyllis/rabbat-iq:latest`. The first beta is also published as `ghcr.io/chriskariofyllis/rabbat-iq:v1.0.0-beta` if you want to pin that tag instead of `latest`.
+The first run pulls `ghcr.io/chriskariofyllis/rabbat-iq:latest`. To pin a release, use `ghcr.io/chriskariofyllis/rabbat-iq:v1.1.0-beta`.
 
 Open http://127.0.0.1:8000. Compose binds port 8000 on localhost. The SQLite database lives in the `rabbat-iq-data` volume.
 
@@ -182,6 +182,7 @@ A new adapter should identify itself with a clear User-Agent, wait between reque
 - Your AI key is sent only to the provider you select.
 - Telegram receives a match only when a token and chat id are saved.
 - The UI sends `noindex` and `robots.txt` disallows crawlers. It is a personal tool, not a public site.
+- Opening Stores loads map tiles for that area from OpenStreetMap France. Interests and API keys are not part of that request. No map API key is required.
 
 ## Tests
 
@@ -194,7 +195,7 @@ pytest
 
 Rabbat-IQ is an unofficial, personal, self-hosted client. You are responsible for complying with the terms of Marktguru and of any site you add a scraper for. Prefer the public aggregator API. This project does not ship scrapers for Lidl, Aldi, Rewe, or other chains.
 
-Offer text, prices, and images remain the property of their sources. The relative store map is computed locally and does not load map tiles.
+Offer text, prices, and images remain the property of their sources. The Stores map loads OpenStreetMap France tiles in the browser. No map API key is required.
 
 ## Layout
 

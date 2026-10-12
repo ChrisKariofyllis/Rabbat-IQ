@@ -17,7 +17,35 @@ NAV = (
     {"id": "settings", "href": "/settings", "label": "Settings"},
 )
 
-PIN_COLORS = tuple(f"var(--color-pin-{index})" for index in range(1, 8))
+# Longer labels first so "galeria kaufhof" stays Galeria and "mix markt" stays Mix.
+CHAIN_TONES = (
+    ("galeria", "galeria"),
+    ("kaufhof", "galeria"),
+    ("mix markt", "mix"),
+    ("mixmarkt", "mix"),
+    ("kaufland", "kaufland"),
+    ("rossmann", "rossmann"),
+    ("edeka", "edeka"),
+    ("rewe", "rewe"),
+    ("lidl", "lidl"),
+    ("netto", "netto"),
+    ("norma", "norma"),
+    ("aldi", "aldi"),
+    ("penny", "penny"),
+    ("tegut", "tegut"),
+    ("globus", "globus"),
+    ("famila", "famila"),
+    ("combi", "combi"),
+    ("hornbach", "hornbach"),
+    ("bauhaus", "bauhaus"),
+    ("muller", "muller"),
+    ("toom", "toom"),
+    ("obi", "obi"),
+    ("hit", "hit"),
+    ("dm", "dm"),
+)
+
+FALLBACK_COUNT = 8
 
 NOTICES = {
     "saved": "Settings saved.",
@@ -172,44 +200,35 @@ def flyer_view(row) -> dict:
 
 
 def store_views(stores, home: tuple[float | None, float | None] | None = None) -> tuple[list[dict], dict | None]:
-    plotted = [store for store in stores if store.latitude is not None and store.longitude is not None]
-    home_lat = None if not home else home[0]
-    home_lon = None if not home else home[1]
-    coords = [(store.latitude, store.longitude) for store in plotted]
-    if home_lat is not None and home_lon is not None:
-        coords.append((home_lat, home_lon))
-    if not coords:
-        plain = [_store_dict(store, None, None, False) for store in stores]
-        return plain, None
-    lats = [item[0] for item in coords]
-    lons = [item[1] for item in coords]
-    min_lat, max_lat = min(lats), max(lats)
-    min_lon, max_lon = min(lons), max(lons)
-    lat_pad = max(max_lat - min_lat, 0.01) * 0.15
-    lon_pad = max(max_lon - min_lon, 0.01) * 0.15
-    min_lat -= lat_pad
-    max_lat += lat_pad
-    min_lon -= lon_pad
-    max_lon += lon_pad
-    lat_span = max_lat - min_lat or 0.01
-    lon_span = max_lon - min_lon or 0.01
-
-    def xy(lat: float, lon: float) -> tuple[float, float]:
-        x = 10 + (lon - min_lon) / lon_span * 80
-        y = 10 + (max_lat - lat) / lat_span * 80
-        return round(x, 2), round(y, 2)
-
     views = []
+    for index, store in enumerate(stores, start=1):
+        view = _store_dict(store)
+        if view["id"] is None:
+            view["id"] = index
+        views.append(view)
+    return views, _home_point(home)
+
+
+def map_payload(stores: list[dict], home: dict | None, radius_m: float | None) -> dict:
+    plotted = []
     for store in stores:
-        point = None
-        if store.latitude is not None and store.longitude is not None:
-            point = xy(store.latitude, store.longitude)
-        views.append(_store_dict(store, point, _color(store.chain or store.name), False))
-    home_point = None
-    if home_lat is not None and home_lon is not None:
-        hx, hy = xy(home_lat, home_lon)
-        home_point = {"x": hx, "y": hy}
-    return views, home_point
+        if store["lat"] is None or store["lon"] is None:
+            continue
+        plotted.append(
+            {
+                "id": store["id"],
+                "name": store["name"],
+                "lat": store["lat"],
+                "lon": store["lon"],
+                "color": store["color"],
+                "tone": store["tone"],
+            }
+        )
+    return {
+        "home": home,
+        "radiusM": None if home is None else radius_m,
+        "stores": plotted,
+    }
 
 
 def scan_view(status: dict) -> dict:
@@ -228,8 +247,10 @@ def scan_view(status: dict) -> dict:
     }
 
 
-def _store_dict(store, point, color, show_label: bool) -> dict:
+def _store_dict(store) -> dict:
+    color, tone = chain_color(store.chain or store.name)
     return {
+        "id": getattr(store, "id", None),
         "name": store.name,
         "chain": store.chain or "",
         "address": store.address or "",
@@ -237,11 +258,40 @@ def _store_dict(store, point, color, show_label: bool) -> dict:
         "postal_code": store.postal_code or "",
         "distance": format_distance(store.distance_m),
         "hours": store.opening_hours or "",
-        "x": None if point is None else point[0],
-        "y": None if point is None else point[1],
-        "color": color or "var(--color-pin-1)",
-        "show_label": show_label,
+        "lat": store.latitude,
+        "lon": store.longitude,
+        "color": color,
+        "tone": tone,
     }
+
+
+def _home_point(home: tuple[float | None, float | None] | None) -> dict | None:
+    if not home or home[0] is None or home[1] is None:
+        return None
+    return {"lat": float(home[0]), "lon": float(home[1])}
+
+
+def chain_color(name: str) -> tuple[str, str]:
+    """CSS color variable shared by the list dot and the map pin."""
+
+    tone = chain_tone(name)
+    if tone:
+        return f"var(--chain-{tone})", tone
+    key = normalize(name) or "store"
+    index = sum(ord(char) for char in key) % FALLBACK_COUNT
+    return f"var(--chain-fallback-{index + 1})", ""
+
+
+def chain_tone(name: str) -> str:
+    text = normalize(name)
+    if not text:
+        return ""
+    for needle, tone in CHAIN_TONES:
+        if text == needle or text.startswith(needle + " "):
+            return tone
+        if len(needle) >= 4 and text.startswith(needle):
+            return tone
+    return ""
 
 
 def _pages(raw: str) -> list[str]:
@@ -253,7 +303,3 @@ def _pages(raw: str) -> list[str]:
         return []
     return [str(item) for item in payload if item]
 
-
-def _color(name: str) -> str:
-    total = sum(ord(char) for char in name or "")
-    return PIN_COLORS[total % len(PIN_COLORS)]

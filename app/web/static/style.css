@@ -58,13 +58,38 @@
   --color-emphasis: var(--color-green);
   --color-shadow: color-mix(in srgb, var(--color-ink) 12%, transparent);
 
-  --color-pin-1: var(--color-green);
-  --color-pin-2: var(--color-gold-700);
-  --color-pin-3: var(--color-ink-soft);
-  --color-pin-4: var(--color-green-800);
-  --color-pin-5: var(--color-green-500);
-  --color-pin-6: var(--color-ink);
-  --color-pin-7: var(--color-bad-700);
+  /* Chain colors. The Stores list and map both read these. */
+  --chain-edeka: #1565c0;
+  --chain-lidl: #f5c400;
+  --chain-netto: #f05a1a;
+  --chain-rewe: #d0121a;
+  --chain-aldi: #163a8a;
+  --chain-aldi-accent: #f28c00;
+  --chain-norma: #2f7d32;
+  --chain-mix: #7b3ff2;
+  --chain-galeria: #e0127a;
+  --chain-kaufland: #7a1f3d;
+  --chain-penny: #c43b5a;
+  --chain-rossmann: #8e1b1b;
+  --chain-dm: #c4622d;
+  --chain-tegut: #6b8e23;
+  --chain-globus: #0e7490;
+  --chain-famila: #5b4b8a;
+  --chain-combi: #b45309;
+  --chain-hornbach: #c2410c;
+  --chain-bauhaus: #9a3412;
+  --chain-muller: #d97706;
+  --chain-toom: #059669;
+  --chain-obi: #f97316;
+  --chain-hit: #4f46e5;
+  --chain-fallback-1: #0f766e;
+  --chain-fallback-2: #6b4f1d;
+  --chain-fallback-3: #3949ab;
+  --chain-fallback-4: #00838f;
+  --chain-fallback-5: #6a1b9a;
+  --chain-fallback-6: #558b2f;
+  --chain-fallback-7: #5d4037;
+  --chain-fallback-8: #00695c;
 
   color-scheme: light dark;
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
@@ -112,13 +137,6 @@
     --color-fill: #3a342c;
     --color-emphasis: #f3c969;
     --color-shadow: color-mix(in srgb, var(--color-ink) 55%, transparent);
-    --color-pin-1: #9ddeb8;
-    --color-pin-2: #f3c969;
-    --color-pin-3: #f3efe6;
-    --color-pin-4: #e7c56a;
-    --color-pin-5: #7dcea0;
-    --color-pin-6: #d9d0c0;
-    --color-pin-7: #f0b4ae;
   }
 }
 
@@ -576,26 +594,126 @@ main {
   align-items: start;
 }
 
-.map-card { padding: 12px; }
-
-.map-card svg {
-  width: 100%;
-  height: auto;
-  background: var(--color-surface-warm);
-  border-radius: 10px;
+.map-card {
+  position: relative;
+  z-index: 1;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.map-frame { fill: none; stroke: var(--color-border); }
+.store-map {
+  height: 440px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  background: var(--color-paper-deep);
+}
 
-.map-card text {
-  font-size: 3.2px;
-  fill: var(--color-text);
+.store-map .map-fallback {
+  margin: 0;
+  padding: 28px 16px;
+  color: var(--color-text-secondary);
+  font-size: var(--footnote);
+}
+
+.store-map.leaflet-container {
+  background: #e7e1d4;
   font-family: var(--font);
 }
 
-.home-pin { fill: var(--color-primary); stroke: var(--color-surface); stroke-width: 0.6; }
+.store-pin,
+.you-marker { background: transparent; border: 0; }
 
-.home-label { font-weight: 700; }
+.pin-dot {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--pin, var(--chain-fallback-1));
+  box-shadow:
+    0 0 0 2px #fffcf7,
+    0 1px 2px rgba(28, 25, 21, 0.24),
+    0 6px 14px rgba(28, 25, 21, 0.22);
+  transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.store-pin.is-hot .pin-dot {
+  transform: scale(1.22);
+  box-shadow:
+    0 0 0 2px #fffcf7,
+    0 0 0 6px color-mix(in srgb, var(--pin, #1c1915) 45%, transparent),
+    0 8px 16px rgba(28, 25, 21, 0.28);
+}
+
+.you-pin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  width: 56px;
+  height: 40px;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.you-label {
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid #e7e1d4;
+  background: #fffcf7;
+  color: #1c1915;
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  box-shadow: 0 1px 2px rgba(28, 25, 21, 0.18), 0 4px 10px rgba(28, 25, 21, 0.12);
+}
+
+.you-dot {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  border-radius: 50%;
+  background: #c4922a;
+  box-shadow:
+    0 0 0 3px #fffcf7,
+    0 1px 2px rgba(28, 25, 21, 0.28),
+    0 6px 12px rgba(28, 25, 21, 0.2);
+}
+
+.store-map .leaflet-control-zoom a {
+  width: 32px;
+  height: 32px;
+  line-height: 30px;
+  background: #fffcf7;
+  color: #1c1915;
+  border-bottom-color: #e7e1d4;
+  text-decoration: none;
+}
+
+.store-map .leaflet-control-zoom a:hover,
+.store-map .leaflet-control-zoom a:active {
+  background: #f3efe6;
+  color: #1c1915;
+  text-decoration: none;
+}
+
+.store-map.leaflet-container .leaflet-control-attribution {
+  background: rgba(255, 252, 247, 0.92);
+  color: #3a342c;
+  font-size: 11px;
+  line-height: 1.3;
+  max-width: calc(100% - 16px);
+  white-space: normal;
+  margin: 0 8px 6px 0;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.store-map .leaflet-control-attribution a { color: #154e31; }
 
 .store-list,
 .interest-list,
@@ -618,6 +736,36 @@ main {
   min-height: 56px;
   padding: 10px 0;
   border-bottom: 1px solid var(--color-border);
+}
+
+.store-list li {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto;
+  column-gap: 12px;
+  align-items: start;
+  padding: 12px 4px;
+  border-radius: 10px;
+}
+
+.store-list li[data-store-id] { cursor: pointer; }
+
+.store-list li.is-hot,
+.store-list li[data-store-id]:hover {
+  background: var(--color-fill);
+}
+
+.chain-dot {
+  width: 10px;
+  height: 10px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: var(--pin, var(--chain-fallback-1));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-ink) 28%, transparent);
+}
+
+.chain-dot[data-tone="aldi"],
+.pin-dot[data-tone="aldi"] {
+  background-image: radial-gradient(circle at 50% 50%, var(--chain-aldi-accent) 0 42%, var(--chain-aldi) 48% 100%);
 }
 
 .store-list li:last-child,
@@ -916,6 +1064,12 @@ footer p { margin: 0 0 6px; }
 
   .map-layout { grid-template-columns: 1fr; }
 
+  .store-map { height: 300px; }
+
+}
+
+@media (min-width: 801px) {
+  .map-card { position: sticky; top: 88px; }
 }
 
 @media (prefers-reduced-transparency: reduce) {

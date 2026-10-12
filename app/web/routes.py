@@ -23,6 +23,7 @@ from app.web.present import (
     match_view,
     matched_interest,
     notice_text,
+    map_payload,
     offer_view,
     scan_view,
     store_chain_options,
@@ -134,6 +135,7 @@ def stores_page(request: Request, store: str = ""):
         visible = [row for row in rows if same_chain(row.chain, selected) or same_chain(row.name, selected)]
     home = (settings.latitude, settings.longitude)
     points, home_point = store_views(visible, home)
+    radius_m = float(settings.radius_km or 5) * 1000
     interests = [row.text for row in repository.list_interests()]
     deals = []
     for offer, label in interest_offers(repository.list_offers(), rows, interests, selected):
@@ -148,7 +150,8 @@ def stores_page(request: Request, store: str = ""):
             "stores",
             stores=points,
             home=home_point,
-            has_map=home_point is not None or any(point["x"] is not None for point in points),
+            has_map=home_point is not None or any(point["lat"] is not None for point in points),
+            map_data=map_payload(points, home_point, radius_m),
             chains=chains,
             selected_store=selected,
             store_offers=deals,
