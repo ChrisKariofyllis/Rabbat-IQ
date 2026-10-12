@@ -21,6 +21,7 @@ jobs:
         with:
           name: ${{ github.ref_name }}
           prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') || contains(github.ref_name, 'alpha') }}
+          make_latest: ${{ contains(github.ref_name, 'beta') && 'false' || 'legacy' }}
           generate_release_notes: true
           body: |
             This is **${{ github.ref_name }}**.
