@@ -1,0 +1,268 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-13T06:51:30.000Z",
+  "title": "Design System: Rabbat-IQ",
+  "extensions": {
+    "colorMeta": {
+      "forest-green": {
+        "role": "primary",
+        "displayName": "Forest Green",
+        "canonical": "oklch(45% 0.11 152)",
+        "tonalRamp": ["#092316", "#0f3a24", "#154e31", "#1e6a43", "#2e8b57", "#52af7b", "#a3dcbc", "#e5f3eb"]
+      },
+      "forest-green-press": {
+        "role": "primary",
+        "displayName": "Forest Green Press",
+        "canonical": "oklch(38% 0.09 152)",
+        "tonalRamp": ["#061a10", "#0b2c1b", "#154e31", "#1c603d", "#277a4f", "#479f6e", "#90d3ac", "#ddf2e5"]
+      },
+      "forest-green-light": {
+        "role": "primary",
+        "displayName": "Mint Wash",
+        "canonical": "oklch(95% 0.03 152)",
+        "tonalRamp": ["#0f3a24", "#154e31", "#1e6a43", "#3a9763", "#74c297", "#b5e5cb", "#dff4e8", "#e5f3eb"]
+      },
+      "market-gold": {
+        "role": "secondary",
+        "displayName": "Market Gold",
+        "canonical": "oklch(83% 0.13 85)",
+        "tonalRamp": ["#4e3808", "#78570f", "#9f7318", "#c4922a", "#f3c969", "#f8dca0", "#faeac4", "#fbf3dc"]
+      },
+      "market-gold-deep": {
+        "role": "secondary",
+        "displayName": "Amber Gold Focus",
+        "canonical": "oklch(66% 0.13 85)",
+        "tonalRamp": ["#362604", "#5d420a", "#8f6713", "#c4922a", "#d9a73e", "#e8bf66", "#f4d99a", "#faeed0"]
+      },
+      "market-gold-light": {
+        "role": "secondary",
+        "displayName": "Butter Wash",
+        "canonical": "oklch(96% 0.03 85)",
+        "tonalRamp": ["#5d420a", "#8f6713", "#c4922a", "#f3c969", "#f9e0ad", "#fcf0d3", "#fdf7e8", "#fbf3dc"]
+      },
+      "warm-paper": {
+        "role": "neutral",
+        "displayName": "Warm Paper",
+        "canonical": "oklch(95% 0.01 80)",
+        "tonalRamp": ["#22201b", "#4a463d", "#7c7567", "#aba392", "#cfc9be", "#e7e1d4", "#f3efe6", "#faf8f4"]
+      },
+      "paper-border": {
+        "role": "neutral",
+        "displayName": "Paper Border",
+        "canonical": "oklch(90% 0.01 80)",
+        "tonalRamp": ["#1c1a16", "#3d3931", "#686154", "#968d7c", "#c2b9a7", "#e7e1d4", "#f0ece3", "#faf8f4"]
+      },
+      "sheet-surface": {
+        "role": "neutral",
+        "displayName": "Sheet Surface",
+        "canonical": "oklch(99% 0.005 80)",
+        "tonalRamp": ["#201e1b", "#45413a", "#746e63", "#a8a294", "#d7d2c7", "#ede9e0", "#fbf6ea", "#fffcf7"]
+      },
+      "sheet-surface-warm": {
+        "role": "neutral",
+        "displayName": "Warm Sheet Hover",
+        "canonical": "oklch(97% 0.015 80)",
+        "tonalRamp": ["#23201a", "#484337", "#766f5c", "#a99f87", "#d6ccb2", "#ede4cc", "#fbf6ea", "#fffcf7"]
+      },
+      "ink-black": {
+        "role": "neutral",
+        "displayName": "Charcoal Ink",
+        "canonical": "oklch(18% 0.01 60)",
+        "tonalRamp": ["#0a0907", "#14120f", "#1c1915", "#3a342c", "#5e584e", "#8c8477", "#bfb9ae", "#ede9e3"]
+      },
+      "ink-muted": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "canonical": "oklch(44% 0.01 60)",
+        "tonalRamp": ["#14120f", "#2b2721", "#443f36", "#5e584e", "#7b7367", "#a0988b", "#c8c2b7", "#eeebe6"]
+      },
+      "alert-red": {
+        "role": "neutral",
+        "displayName": "Alert Red",
+        "canonical": "oklch(42% 0.13 25)",
+        "tonalRamp": ["#3a1010", "#5c1d1d", "#8c2f2f", "#b43d3d", "#d95c5c", "#ea8888", "#f4bbb4", "#f8e8e4"]
+      },
+      "alert-red-bg": {
+        "role": "neutral",
+        "displayName": "Alert Wash",
+        "canonical": "oklch(93% 0.03 25)",
+        "tonalRamp": ["#5c1d1d", "#8c2f2f", "#b43d3d", "#d95c5c", "#e78f8f", "#f2c1bb", "#fae0dc", "#f8e8e4"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display Masthead",
+        "purpose": "H1 page and section mastheads exclusively. Set in Liberation Serif with balanced text wrap."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Card grouping headers, modal headings, and major section partitions."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Individual deal titles, product headlines, and prominent card names."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Primary narrative text, instructions, and list item contents constrained to 68ch measure."
+      },
+      "label": {
+        "displayName": "Label & Control",
+        "purpose": "Navigation tabs, form labels, buttons, and subheads."
+      },
+      "price": {
+        "displayName": "Price Callout",
+        "purpose": "Large offer discount price display with tabular numerals."
+      }
+    },
+    "shadows": [
+      {
+        "name": "sheet-standard",
+        "value": "0 1px 2px rgba(28, 25, 21, 0.12), 0 8px 20px rgba(28, 25, 21, 0.08)",
+        "purpose": "Elevation for surface cards, panels, and ledger bars."
+      },
+      {
+        "name": "marker-lift",
+        "value": "0 1px 2px rgba(28, 25, 21, 0.24), 0 6px 14px rgba(28, 25, 21, 0.22)",
+        "purpose": "Map pin dot floating depth and tactile contrast against tile textures."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-standard",
+        "value": "cubic-bezier(0.2, 0, 0, 1)",
+        "purpose": "Micro-interaction transitions for hover and state changes (160ms)."
+      },
+      {
+        "name": "ease-bounce",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Map marker scale and pulse hover transition (160ms)."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mobile",
+        "value": "800px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Standard call-to-action button for initiating scans and saving critical settings.",
+      "html": "<button class=\"ds-btn-primary\">Scan now</button>",
+      "css": ".ds-btn-primary { background: #1e6a43; color: #fffcf7; min-height: 44px; padding: 8px 16px; border-radius: 12px; font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", system-ui, sans-serif; font-size: 0.9375rem; font-weight: 700; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; transition: background-color 160ms cubic-bezier(0.2, 0, 0, 1); } .ds-btn-primary:hover, .ds-btn-primary:active { background: #154e31; } .ds-btn-primary:focus-visible { outline: 3px solid #c4922a; outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Bordered alternate action for modal toggles, mobile menu buttons, and secondary links.",
+      "html": "<button class=\"ds-btn-secondary\">View stores</button>",
+      "css": ".ds-btn-secondary { background: #fffcf7; color: #1e6a43; border: 1px solid #e7e1d4; min-height: 44px; padding: 8px 16px; border-radius: 12px; font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", system-ui, sans-serif; font-size: 0.9375rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; transition: background-color 160ms cubic-bezier(0.2, 0, 0, 1); } .ds-btn-secondary:hover, .ds-btn-secondary:active { background: #fbf3dc; } .ds-btn-secondary:focus-visible { outline: 3px solid #c4922a; outline-offset: 2px; }"
+    },
+    {
+      "name": "Interest Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Supermarket gold keyword pill used for quick search filters and active watchlist tags.",
+      "html": "<button class=\"ds-chip\">Kaffee</button>",
+      "css": ".ds-chip { background: #f3c969; color: #1c1915; min-height: 44px; padding: 0 14px; border-radius: 999px; border: none; font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", system-ui, sans-serif; font-size: 0.9375rem; font-weight: 650; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: background-color 160ms cubic-bezier(0.2, 0, 0, 1); } .ds-chip:hover, .ds-chip:active { background: #e6b84f; } .ds-chip:focus-visible { outline: 3px solid #c4922a; outline-offset: 2px; }"
+    },
+    {
+      "name": "Deal Card",
+      "kind": "card",
+      "refersTo": "card-panel",
+      "description": "Tactile offer sheet container highlighting retail discounts, chain tags, and price comparisons.",
+      "html": "<div class=\"ds-deal\"><div class=\"ds-deal-top\"><span class=\"ds-chain\">EDEKA</span><span class=\"ds-off\">-33%</span></div><h3 class=\"ds-deal-title\">Bio Hafermilch 1L</h3><div class=\"ds-price-row\"><span class=\"ds-price\">€ 1.29</span><span class=\"ds-was\">€ 1.95</span></div></div>",
+      "css": ".ds-deal { background: #fffcf7; border: 1px solid #e7e1d4; border-radius: 14px; padding: 14px; box-shadow: 0 1px 2px rgba(28, 25, 21, 0.12), 0 8px 20px rgba(28, 25, 21, 0.08); display: flex; flex-direction: column; gap: 8px; font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", system-ui, sans-serif; } .ds-deal-top { display: flex; justify-content: space-between; align-items: center; } .ds-chain { font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; color: #1e6a43; } .ds-off { padding: 2px 8px; border-radius: 999px; background: #f3c969; color: #1c1915; font-size: 0.8125rem; font-weight: 700; } .ds-deal-title { margin: 0; font-size: 1.125rem; font-weight: 650; line-height: 1.3; color: #1c1915; } .ds-price-row { display: flex; align-items: baseline; gap: 8px; } .ds-price { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; color: #1e6a43; } .ds-was { color: #5e584e; font-size: 0.9375rem; text-decoration: line-through; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Form Input",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Clean 44px text field with subtle border and warm background for query and configuration entry.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Postal code, e.g. 10115\" value=\"10115\">",
+      "css": ".ds-input { width: 100%; min-height: 44px; font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", system-ui, sans-serif; font-size: 1.0625rem; color: #1c1915; background: #fffcf7; border: 1px solid #e7e1d4; border-radius: 10px; padding: 10px 12px; box-sizing: border-box; } .ds-input:focus-visible { outline: 3px solid #c4922a; outline-offset: 2px; } .ds-input::placeholder { color: #5e584e; }"
+    },
+    {
+      "name": "Metric Ledger",
+      "kind": "custom",
+      "refersTo": "card-panel",
+      "description": "Signature overview summary ledger presenting high-level grocery scan statistics.",
+      "html": "<div class=\"ds-ledger\"><div class=\"ds-ledger-item\"><span>Matches</span><strong>14</strong></div><div class=\"ds-ledger-item\"><span>Stores</span><strong>8</strong></div></div>",
+      "css": ".ds-ledger { display: grid; grid-template-columns: 1fr 1fr; background: #fffcf7; border: 1px solid #e7e1d4; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 2px rgba(28, 25, 21, 0.12), 0 8px 20px rgba(28, 25, 21, 0.08); font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", system-ui, sans-serif; } .ds-ledger-item { display: flex; flex-direction: column; gap: 2px; padding: 12px 16px; border-right: 1px solid #e7e1d4; } .ds-ledger-item:last-child { border-right: none; } .ds-ledger-item span { color: #5e584e; font-size: 0.8125rem; } .ds-ledger-item strong { font-size: 1.125rem; font-weight: 650; font-variant-numeric: tabular-nums; color: #1e6a43; }"
+    },
+    {
+      "name": "Map Store Pin",
+      "kind": "custom",
+      "refersTo": "card-panel",
+      "description": "Chain-coded geographic marker pin on interactive Leaflet maps with white halo and tactile elevation.",
+      "html": "<div class=\"ds-pin-wrapper\"><span class=\"ds-pin-dot\"></span></div>",
+      "css": ".ds-pin-wrapper { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; } .ds-pin-dot { display: block; width: 18px; height: 18px; border-radius: 50%; background: #1565c0; box-shadow: 0 0 0 2px #fffcf7, 0 1px 2px rgba(28, 25, 21, 0.24), 0 6px 14px rgba(28, 25, 21, 0.22); transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 160ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-pin-dot:hover { transform: scale(1.22); box-shadow: 0 0 0 2px #fffcf7, 0 0 0 6px rgba(21, 101, 192, 0.4), 0 8px 16px rgba(28, 25, 21, 0.28); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Grocer's Ledger",
+    "overview": "Rabbat-IQ bridges tactile newsprint flyers and the quiet utility of a household pantry ledger. Built for households scanning supermarket deals in Germany and Austria, the visual language avoids generic SaaS minimalism and loud e-commerce gimmicks. It treats grocery flyers with editorial respect: physical paper tones, deliberate serif mastheads, authoritative ink-black typography, and purposeful retail accents inspired by supermarket price tags.\n\nThe system lives on a physical paper canvas (#f3efe6) upon which crisp, warm white paper sheets (#fffcf7) rest with subtle dual-tier shadows. Key retail affordances—vibrant grocery gold (#f3c969) for discount pills and active tabs, deep forest green (#1e6a43) for primary actions and confirmed savings—bring warmth and instant scanability without visual clutter.",
+    "keyCharacteristics": [
+      "Paper & Ink Materiality: Warm natural paper backgrounds with rich charcoal ink text, avoiding sterile pure-white and harsh blue-black contrasts.",
+      "Editorial Typography Pairing: Classic serif page titles evoking physical newspaper mastheads paired with highly legible system sans-serif for high-density offer comparisons.",
+      "Strict Touch Target Geometry: A guaranteed 44px minimum touch target height across buttons, navigation items, chips, and inputs for effortless mobile handling in the kitchen or aisle.",
+      "Tabular Precision: Consistent tabular figures (font-variant-numeric: tabular-nums) across prices, percentages, distances, and quantities."
+    ],
+    "rules": [
+      {
+        "name": "The Rarity of Gold Rule",
+        "body": "Market gold (#f3c969) is reserved strictly for active states, saved deals, and discount callouts. It must never coat background containers or neutral cards.",
+        "section": "colors"
+      },
+      {
+        "name": "The Paper Invariant Rule",
+        "body": "The page background must never be pure white (#ffffff). The warm paper base (#f3efe6 in light, #1c1915 in dark) anchors the physical identity across all surfaces.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Pricing Rule",
+        "body": "Any price, discount percentage, countdown date, or geographic distance must declare font-variant-numeric: tabular-nums to ensure stable vertical alignment in lists and ledgers.",
+        "section": "typography"
+      },
+      {
+        "name": "The Balanced Title Rule",
+        "body": "Display H1 and Headline H2 elements must include text-wrap: balance to prevent orphan words on narrow displays.",
+        "section": "typography"
+      },
+      {
+        "name": "The 44px Touch Floor Rule",
+        "body": "Every clickable control, button, input field, and navigation tab must satisfy min-height: 44px (--control: 44px) to guarantee accessibility across handheld devices.",
+        "section": "layout"
+      },
+      {
+        "name": "The Sheet-on-Paper Rule",
+        "body": "Elevation never stacks more than two levels deep: the paper canvas, and the interactive sheet container. Cards do not sit inside floating cards.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Capsule Semantics Rule",
+        "body": "Full rounded pill geometry (999px) is reserved exclusively for metadata tags, status pills, filter chips, and count indicators. Buttons and cards never use full capsules.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do wrap every pricing display, discount tag, and distance indicator in font-variant-numeric: tabular-nums.",
+      "Do ensure all clickable elements have at least 44px height and explicit :focus-visible ring outlines.",
+      "Do use Liberation Serif exclusively for H1 page titles; keep body, lists, and data tables in system sans-serif.",
+      "Do preserve the warm paper canvas (#f3efe6 light / #1c1915 dark) for all new screens.",
+      "Do apply text-wrap: balance to major headlines to prevent dangling words on mobile."
+    ],
+    "donts": [
+      "Don't use pure #ffffff as a background color on any surface; use #fffcf7 for elevated sheets and #f3efe6 for base pages.",
+      "Don't use Market Gold (#f3c969) as a large container background; reserve it for badges, chips, and active highlights.",
+      "Don't remove the hairline 1px solid #e7e1d4 border from elevated cards and panels.",
+      "Don't invent external font CDNs or webfont links; fonts must render from local assets or standard system UI fallbacks.",
+      "Don't shrink touch targets below 44px on mobile or desktop viewports."
+    ]
+  }
+}
