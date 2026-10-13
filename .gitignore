@@ -11,6 +11,9 @@ data/
 skills-lock.json
 
 .agents/
+.github/agents/
+.github/hooks/
+.github/skills/
 .cursor/skills/*
 !.cursor/skills/impeccable/
 !.cursor/skills/impeccable/**
