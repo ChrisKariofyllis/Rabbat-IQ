@@ -1,12 +1,12 @@
 <article class="deal">
-  <h2>{{ deal.product }}</h2>
+  <h3>{{ deal.product }}</h3>
   <div class="deal-top">
     <p class="chain">{{ deal.chain or deal.store_name or "Store" }}</p>
     {% if deal.when %}<p class="when">{{ deal.when }}</p>{% endif %}
   </div>
   {% if deal.image_url %}
   <div class="deal-photo">
-    <img src="{{ deal.image_url }}" alt="" loading="lazy" decoding="async">
+    <img src="{{ deal.image_url }}" alt="{{ deal.product }}{% if deal.brand %} ({{ deal.brand }}){% endif %}" loading="lazy" decoding="async">
   </div>
   {% endif %}
   {% if deal.brand %}<p class="brand">{{ deal.brand }}</p>{% endif %}
@@ -27,7 +27,7 @@
   {% endif %}
   <div class="deal-links">
     {% if deal.link_url %}
-    <a href="{{ deal.link_url }}" target="_blank" rel="noopener noreferrer">Open offer</a>
+    <a href="{{ deal.link_url }}" target="_blank" rel="noopener noreferrer" aria-label="Open offer for {{ deal.product }}{% if deal.chain or deal.store_name %} at {{ deal.chain or deal.store_name }}{% endif %} (opens in new tab)">Open offer</a>
     {% endif %}
     {% if deal.notified %}
     <span class="hint">Sent to Telegram</span>

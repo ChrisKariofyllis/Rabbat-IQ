@@ -24,7 +24,7 @@
   <li>
     <span>{{ interest.text }}</span>
     <form method="post" action="/interests/{{ interest.id }}/delete">
-      <button class="secondary destructive" type="submit">Remove</button>
+      <button class="destructive" type="submit" aria-label="Remove interest {{ interest.text }}">Remove</button>
     </form>
   </li>
   {% endfor %}

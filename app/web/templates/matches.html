@@ -6,7 +6,7 @@
   <p class="lede">A match is kept once per offer, interest, price, and validity date. The same deal is not sent to Telegram again.</p>
   {% if matches %}
   <form method="post" action="/matches/clear">
-    <button class="secondary destructive" type="submit">Clear history</button>
+    <button class="destructive" type="submit" aria-label="Clear all saved matches history">Clear history</button>
   </form>
   {% endif %}
 </div>

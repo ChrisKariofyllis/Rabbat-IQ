@@ -10,7 +10,7 @@
 {% macro store_list(stores) %}
 <ul class="store-list">
   {% for store in stores %}
-  <li {% if store.lat is not none and store.lon is not none %}data-store-id="{{ store.id }}"{% endif %}>
+  <li {% if store.lat is not none and store.lon is not none %}data-store-id="{{ store.id }}" tabindex="0" role="button" aria-label="Center {{ store.name }} on map{% if store.distance %}, {{ store.distance }}{% endif %}"{% endif %}>
     <span class="chain-dot" data-tone="{{ store.tone }}" style="--pin: {{ store.color }}" aria-hidden="true"></span>
     <div>
       <strong>{{ store.name }}</strong>
@@ -25,14 +25,14 @@
 {% if chains %}
 <form class="filter-bar" method="get" action="/stores">
   <label for="store">Offers at
-    <select id="store" name="store">
+    <select id="store" name="store" aria-label="Filter offers by store">
       <option value="">All stores</option>
       {% for chain in chains %}
       <option value="{{ chain }}" {% if selected_store == chain %}selected{% endif %}>{{ chain }}</option>
       {% endfor %}
     </select>
   </label>
-  <button type="submit">Show</button>
+  <button type="submit" aria-label="Filter stores by selected chain">Show</button>
 </form>
 {% endif %}
 {% if stores %}

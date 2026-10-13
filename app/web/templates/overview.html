@@ -17,11 +17,11 @@
   </div>
 </section>
 
-<section class="ledger" aria-label="Counts">
-  <a href="/stores"><span>Stores in range</span><strong>{{ stats.stores }}</strong></a>
-  <a href="/flyers"><span>Current flyers</span><strong>{{ stats.flyers }}</strong></a>
-  <a href="/offers"><span>Offers saved</span><strong>{{ stats.offers }}</strong></a>
-  <a href="/matches"><span>Matches</span><strong>{{ stats.matches }}</strong></a>
+<section class="ledger" aria-label="Summary counts">
+  <a href="/stores" aria-label="{{ stats.stores }} stores in range"><span>Stores in range</span><strong>{{ stats.stores }}</strong></a>
+  <a href="/flyers" aria-label="{{ stats.flyers }} current flyers"><span>Current flyers</span><strong>{{ stats.flyers }}</strong></a>
+  <a href="/offers" aria-label="{{ stats.offers }} offers saved"><span>Offers saved</span><strong>{{ stats.offers }}</strong></a>
+  <a href="/matches" aria-label="{{ stats.matches }} matches"><span>Matches</span><strong>{{ stats.matches }}</strong></a>
 </section>
 
 {% if show_setup %}
@@ -32,7 +32,7 @@
     <li class="{{ 'done' if step.done else '' }}">
       <a href="{{ step.href }}">{{ step.label }}</a>
       {% if step.optional and not step.done %}<span class="hint">Optional</span>{% endif %}
-      {% if step.done %}<span class="hint">Done</span>{% endif %}
+      {% if step.done %}<span class="pill pill-done">Done</span>{% endif %}
     </li>
     {% endfor %}
   </ol>
@@ -42,7 +42,7 @@
 <section>
   <div class="section-head">
     <h2>Recent matches</h2>
-    <a href="/matches">All matches</a>
+    <a href="/matches" aria-label="View all recent matches">All matches</a>
   </div>
   {% if matches %}
   <div class="cards">
@@ -62,7 +62,7 @@
 <section>
   <div class="section-head">
     <h2>Flyers this week</h2>
-    <a href="/flyers">All flyers</a>
+    <a href="/flyers" aria-label="View all flyers this week">All flyers</a>
   </div>
   <div class="cards flyers">
     {% for flyer in flyers %}
@@ -73,7 +73,7 @@
       <div class="flyer-fallback">{{ flyer.chain }}</div>
       {% endif %}
       <div class="flyer-meta">
-        <strong>{{ flyer.chain }}</strong>
+        <h3>{{ flyer.chain }}</h3>
         <span class="scope scope-{{ flyer.scope or 'postal' }}">{{ flyer.scope_label }}</span>
         <span>{{ flyer.when }}</span>
       </div>

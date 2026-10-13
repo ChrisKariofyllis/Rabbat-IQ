@@ -96,6 +96,7 @@
   --body: 1.0625rem;
   --title: clamp(1.7rem, 2.4vw, 2rem);
   --headline: 1.375rem;
+  --price: 1.5rem;
   --subhead: 0.9375rem;
   --footnote: 0.8125rem;
   --caption: 0.75rem;
@@ -203,7 +204,7 @@ a:hover { text-decoration-thickness: 2px; }
   background: var(--color-primary);
   color: var(--color-on-primary);
   padding: 8px 12px;
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
 .skip:focus { top: calc(12px + env(safe-area-inset-top)); }
@@ -438,7 +439,7 @@ main {
 
 .deal { padding: 14px; display: flex; flex-direction: column; gap: var(--space-2); }
 
-.deal h2 {
+.deal h3 {
   margin: 0;
   font-family: var(--font);
   font-size: 1.125rem;
@@ -479,7 +480,7 @@ main {
   padding: 12px;
 }
 
-.flyer-meta strong { font-size: var(--body); }
+.flyer-meta h3 { margin: 0; font-size: var(--body); font-weight: 700; letter-spacing: normal; }
 
 .flyer-meta span { color: var(--color-text-secondary); font-size: var(--footnote); }
 
@@ -540,7 +541,7 @@ main {
 .when, .brand, .desc { color: var(--color-text-secondary); font-size: var(--footnote); }
 
 .price {
-  font-size: 1.5rem;
+  font-size: var(--price);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
@@ -560,7 +561,10 @@ main {
   color: var(--color-chip-ink);
   font-size: var(--footnote);
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
+
+.when, .why, .hint { font-variant-numeric: tabular-nums; }
 
 .why span { font-weight: 700; }
 
@@ -576,6 +580,16 @@ main {
 }
 
 .checklist a { font-weight: 650; }
+
+.checklist li.done a {
+  color: var(--color-text-secondary);
+  text-decoration: line-through;
+}
+
+.pill.pill-done {
+  background: var(--color-ok-bg);
+  color: var(--color-ok-ink);
+}
 
 .panel h2 { margin-bottom: var(--space-2); }
 
@@ -619,7 +633,7 @@ main {
 }
 
 .store-map.leaflet-container {
-  background: #e7e1d4;
+  background: var(--color-paper-deep);
   font-family: var(--font);
 }
 
@@ -633,18 +647,18 @@ main {
   border-radius: 50%;
   background: var(--pin, var(--chain-fallback-1));
   box-shadow:
-    0 0 0 2px #fffcf7,
-    0 1px 2px rgba(28, 25, 21, 0.24),
-    0 6px 14px rgba(28, 25, 21, 0.22);
+    0 0 0 2px var(--color-surface),
+    0 1px 2px var(--color-shadow),
+    0 6px 14px var(--color-shadow);
   transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 160ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .store-pin.is-hot .pin-dot {
   transform: scale(1.22);
   box-shadow:
-    0 0 0 2px #fffcf7,
-    0 0 0 6px color-mix(in srgb, var(--pin, #1c1915) 45%, transparent),
-    0 8px 16px rgba(28, 25, 21, 0.28);
+    0 0 0 2px var(--color-surface),
+    0 0 0 6px color-mix(in srgb, var(--pin, var(--color-ink)) 45%, transparent),
+    0 8px 16px var(--color-shadow);
 }
 
 .you-pin {
@@ -661,15 +675,15 @@ main {
 .you-label {
   padding: 2px 7px;
   border-radius: 999px;
-  border: 1px solid #e7e1d4;
-  background: #fffcf7;
-  color: #1c1915;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
   font-family: var(--font);
-  font-size: 11px;
+  font-size: var(--caption);
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.01em;
-  box-shadow: 0 1px 2px rgba(28, 25, 21, 0.18), 0 4px 10px rgba(28, 25, 21, 0.12);
+  box-shadow: 0 1px 2px var(--color-shadow), 0 4px 10px var(--color-shadow);
 }
 
 .you-dot {
@@ -677,43 +691,56 @@ main {
   height: 14px;
   flex: 0 0 14px;
   border-radius: 50%;
-  background: #c4922a;
+  background: var(--color-focus);
   box-shadow:
-    0 0 0 3px #fffcf7,
-    0 1px 2px rgba(28, 25, 21, 0.28),
-    0 6px 12px rgba(28, 25, 21, 0.2);
+    0 0 0 3px var(--color-surface),
+    0 1px 2px var(--color-shadow),
+    0 6px 12px var(--color-shadow);
 }
 
-.store-map .leaflet-control-zoom a {
-  width: 32px;
-  height: 32px;
-  line-height: 30px;
-  background: #fffcf7;
-  color: #1c1915;
-  border-bottom-color: #e7e1d4;
+.store-map.leaflet-container .leaflet-bar {
+  border-radius: 10px;
+  box-shadow: var(--shadow-sheet);
+}
+
+.store-map .leaflet-control-zoom.leaflet-bar a {
+  width: var(--control);
+  height: var(--control);
+  line-height: calc(var(--control) - 2px);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-bottom-color: var(--color-border);
   text-decoration: none;
+}
+
+.store-map .leaflet-control-zoom.leaflet-bar a:first-child {
+  border-radius: 10px 10px 0 0;
+}
+
+.store-map .leaflet-control-zoom.leaflet-bar a:last-child {
+  border-radius: 0 0 10px 10px;
 }
 
 .store-map .leaflet-control-zoom a:hover,
 .store-map .leaflet-control-zoom a:active {
-  background: #f3efe6;
-  color: #1c1915;
+  background: var(--color-surface-warm);
+  color: var(--color-text);
   text-decoration: none;
 }
 
 .store-map.leaflet-container .leaflet-control-attribution {
-  background: rgba(255, 252, 247, 0.92);
-  color: #3a342c;
-  font-size: 11px;
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  color: var(--color-text-secondary);
+  font-size: var(--caption);
   line-height: 1.3;
   max-width: calc(100% - 16px);
   white-space: normal;
   margin: 0 8px 6px 0;
   padding: 2px 6px;
-  border-radius: 6px;
+  border-radius: var(--space-2);
 }
 
-.store-map .leaflet-control-attribution a { color: #154e31; }
+.store-map .leaflet-control-attribution a { color: var(--color-link); }
 
 .store-list,
 .interest-list,
@@ -750,8 +777,14 @@ main {
 .store-list li[data-store-id] { cursor: pointer; }
 
 .store-list li.is-hot,
-.store-list li[data-store-id]:hover {
+.store-list li[data-store-id]:hover,
+.store-list li[data-store-id]:focus-visible {
   background: var(--color-fill);
+}
+
+.store-list li[data-store-id]:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: -2px;
 }
 
 .chain-dot {
@@ -1052,8 +1085,6 @@ footer p { margin: 0 0 6px; }
 
   .site-nav.open { display: flex; }
 
-  .site-nav a { border-radius: 12px; }
-
   .brand-note { display: none; }
 
   .ledger { grid-template-columns: 1fr 1fr; }
@@ -1081,7 +1112,12 @@ footer p { margin: 0 0 6px; }
   *::before,
   *::after {
     scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .pin-dot,
+  .store-pin.is-hot .pin-dot {
     transition: none !important;
-    animation: none !important;
   }
 }

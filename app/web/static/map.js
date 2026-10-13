@@ -163,6 +163,15 @@
       setHot(id);
       map.panTo(marker.getLatLng(), { animate: !reduceMotion, duration: 0.25 });
     });
+    item.addEventListener("focus", () => setHot(id));
+    item.addEventListener("blur", () => setHot(null));
+    item.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
+        event.preventDefault();
+        setHot(id);
+        map.panTo(marker.getLatLng(), { animate: !reduceMotion, duration: 0.25 });
+      }
+    });
   });
 
   if (hasHome) {
